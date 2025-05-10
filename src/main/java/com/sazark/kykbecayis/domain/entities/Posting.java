@@ -1,0 +1,34 @@
+package com.sazark.kykbecayis.domain.entities;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.List;
+
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Posting {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @OneToOne
+    @JoinColumn(name = "source_dorm_id")
+    private Dorm sourceDorm;
+
+    @ManyToMany
+    @JoinTable(
+            name = "posting_target_dorms",
+            joinColumns = @JoinColumn(name = "posting_id"),
+            inverseJoinColumns = @JoinColumn(name = "dorm_id")
+    )
+    private List<Dorm> targetDorms;
+}
