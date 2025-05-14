@@ -16,9 +16,10 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(unique = true, nullable = false)
+    private String firebaseUID;
     private String firstname;
     private String surname;
-    private String password; // Will be replaced with Firebase Auth in the future
 
     private String email;
     private String phone;

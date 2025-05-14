@@ -29,6 +29,7 @@ public class UserMapper implements Mapper<User, UserDto> {
 
         return UserDto.builder()
                 .id(user.getId())
+                .firebaseUID(user.getFirebaseUID())
                 .firstname(user.getFirstname())
                 .surname(user.getSurname())
                 .email(user.getEmail())
@@ -51,6 +52,7 @@ public class UserMapper implements Mapper<User, UserDto> {
 
         return User.builder()
                 .id(userDto.getId())
+                .firebaseUID(userDto.getFirebaseUID())
                 .firstname(userDto.getFirstname())
                 .surname(userDto.getSurname())
                 .email(userDto.getEmail())
