@@ -8,7 +8,6 @@ import com.sazark.kykbecayis.repositories.BlockRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.List;
 
 @Component
 public class DormMapper implements Mapper<Dorm, DormDto> {
@@ -28,12 +27,8 @@ public class DormMapper implements Mapper<Dorm, DormDto> {
                 .type(dorm.getType())
                 .fullAddress(String.valueOf(dorm.getFullAddress()))
                 .city(dorm.getCity())
-                .province(dorm.getProvince())
-                .latitude(dorm.getLatitude())
-                .longitude(dorm.getLongitude())
                 .name(dorm.getName())
                 .phoneNumber(String.valueOf(dorm.getPhoneNumber()))
-                .faxNumber(String.valueOf(dorm.getFaxNumber()))
                 .blockIds(dorm.getBlocks() != null
                         ? dorm.getBlocks().stream().map(Block::getId).toList()
                         : new ArrayList<>())
@@ -49,12 +44,8 @@ public class DormMapper implements Mapper<Dorm, DormDto> {
                 .type(dormDto.getType())
                 .fullAddress(dormDto.getFullAddress())
                 .city(dormDto.getCity())
-                .province(dormDto.getProvince())
-                .latitude(dormDto.getLatitude())
-                .longitude(dormDto.getLongitude())
                 .name(dormDto.getName())
                 .phoneNumber(dormDto.getPhoneNumber())
-                .faxNumber(dormDto.getFaxNumber())
                 .blocks(dormDto.getBlockIds() != null
                         ? blockRepository.findAllById(dormDto.getBlockIds())
                         : new ArrayList<>())

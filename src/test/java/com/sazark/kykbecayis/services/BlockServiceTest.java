@@ -41,9 +41,6 @@ class BlockServiceTest {
                 .type(GenderType.MALE)
                 .fullAddress("123 Test St")
                 .city("Testville")
-                .province("Testland")
-                .latitude(1.23)
-                .longitude(4.56)
                 .dormId(2L)
                 .build();
 
@@ -52,9 +49,6 @@ class BlockServiceTest {
                 .type(GenderType.MALE)
                 .fullAddress("123 Test St")
                 .city("Testville")
-                .province("Testland")
-                .latitude(1.23)
-                .longitude(4.56)
                 .build();
     }
 

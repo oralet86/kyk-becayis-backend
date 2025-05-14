@@ -21,11 +21,6 @@ public class Block {
     // Addresses
     private String fullAddress;
     private String city;
-    private String province;
-
-    // Coordinates
-    private Double latitude;
-    private Double longitude;
 
     @ManyToOne
     private Dorm dorm;

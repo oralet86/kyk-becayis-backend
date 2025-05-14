@@ -23,15 +23,9 @@ public class Dorm {
     // Addresses
     private String fullAddress;
     private String city;
-    private String province;
-
-    // Coordinates
-    private Double latitude;
-    private Double longitude;
 
     private String name;
     private String phoneNumber;
-    private String faxNumber;
 
     @OneToMany(mappedBy = "dorm", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Block> blocks;

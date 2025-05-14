@@ -38,9 +38,6 @@ class BlockControllerTest {
                 .type(GenderType.MALE)
                 .fullAddress("123 Test St")
                 .city("Testville")
-                .province("Testland")
-                .latitude(1.0)
-                .longitude(2.0)
                 .dormId(5L)
                 .build();
     }
