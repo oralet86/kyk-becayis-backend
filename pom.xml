@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.sazark</groupId>
-    <artifactId>kyk-becayis-backend</artifactId>
+    <artifactId>kykbecayis</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>kyk-becayis-backend</name>
-    <description>kyk-becayis-backend</description>
+    <name>kykbecayis</name>
+    <description>kykbecayis</description>
     <url/>
     <licenses>
         <license/>
