@@ -14,12 +14,14 @@ public class DormImportCommand implements CommandLineRunner {
     public void run(String... args) {
         if (args.length > 0 && args[0].equalsIgnoreCase("import-dorms")) {
             try {
-                dormImportService.importDormsFromCsv();
+                dormImportService.importDormsFromJson();
                 System.out.println("Dorm import completed.");
             } catch (Exception e) {
                 System.err.println("Error importing dorms: " + e.getMessage());
                 e.printStackTrace();
+                System.exit(1);
             }
+            System.exit(0);
         }
     }
 }

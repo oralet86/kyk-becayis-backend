@@ -15,56 +15,41 @@ import java.util.List;
 public class DormImportService {
 
     private final DormRepository dormRepository;
-    private final DormCsvReader dormCsvReader;
+    private final DormJsonReader dormJsonReader;
 
-    public void importDormsFromCsv() throws Exception {
-        List<String[]> rows = dormCsvReader.readDormCsv();
+    public void importDormsFromJson() throws Exception {
+        List<DormJsonDto> dorms = dormJsonReader.readDormJson();
 
-        for (String[] parts : rows) {
-            Dorm dorm = parseDormLine(parts);
+        for (DormJsonDto dto : dorms) {
+            Dorm dorm = mapDorm(dto);
             dormRepository.save(dorm);
         }
     }
 
-    private Dorm parseDormLine(String[] parts) {
-        String name = parts[0].trim();
-        GenderType dormType = parseGenderType(parts[1]);
-        String phone = extractValue(parts[2]);
-        String fax = extractValue(parts[3]);
-        String fullAddress = extractValue(parts[4]);
-
-        String city = extractCity(fullAddress);
-        String province = extractProvince(fullAddress);
+    private Dorm mapDorm(DormJsonDto dto) {
+        GenderType dormType = parseGenderType(dto.getType());
 
         List<Block> blocks = new ArrayList<>();
-        for (int i = 5; i + 2 < parts.length; i += 3) {
-            String blockName = parts[i].trim();
-            String genderRaw = parts[i + 1].trim();
-            String address = parts[i + 2].trim();
-
+        for (BlockJsonDto blockDto : dto.getBlocks()) {
             try {
-                GenderType blockType = parseGenderType(genderRaw);
+                GenderType blockType = parseGenderType(blockDto.getType());
                 Block block = Block.builder()
                         .type(blockType)
-                        .fullAddress(address)
-                        .city(extractCity(address))
-                        .province(extractProvince(address))
+                        .fullAddress(blockDto.getAddress())
+                        .city(blockDto.getCity())
                         .build();
                 blocks.add(block);
             } catch (IllegalArgumentException e) {
-                System.err.println("Skipping block due to invalid gender type: " + genderRaw + " in block: " + blockName);
+                System.err.println("Skipping block due to invalid gender type: " + blockDto.getType() + " in block: " + blockDto.getName());
             }
         }
 
-
         Dorm dorm = Dorm.builder()
-                .name(name)
+                .name(dto.getName())
                 .type(dormType)
-                .phoneNumber(phone)
-                .faxNumber(fax)
-                .fullAddress(fullAddress)
-                .city(city)
-                .province(province)
+                .phoneNumber(dto.getPhone())
+                .fullAddress(dto.getAddress())
+                .city(dto.getCity())
                 .blocks(blocks)
                 .build();
 
@@ -72,35 +57,13 @@ public class DormImportService {
         return dorm;
     }
 
-    private String extractValue(String part) {
-        return part.contains(":") ? part.split(":", 2)[1].trim() : part.trim();
-    }
-
     private GenderType parseGenderType(String raw) {
-        raw = raw.toLowerCase().replace("tipi", "")
-                .replace(":", "")
-                .trim();
+        raw = raw.toLowerCase().trim();
         return switch (raw) {
             case "erkek" -> GenderType.MALE;
             case "kız" -> GenderType.FEMALE;
             case "karma" -> GenderType.HYBRID;
             default -> throw new IllegalArgumentException("Unknown gender type: " + raw);
         };
-    }
-
-    private String extractCity(String address) {
-        if (address.contains("/")) {
-            String[] parts = address.split("/");
-            return parts[0].trim().replaceAll(".*\\s", "");
-        }
-        return "";
-    }
-
-    private String extractProvince(String address) {
-        if (address.contains("/")) {
-            String[] parts = address.split("/");
-            return parts[1].trim();
-        }
-        return "";
     }
 }
