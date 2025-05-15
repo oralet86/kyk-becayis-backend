@@ -1,0 +1,10 @@
+services:
+  db:
+    image: postgres:15
+    ports:
+      - "5432:5432"
+    restart: always
+    environment:
+      POSTGRES_DB: yurtbul
+      POSTGRES_USER: yurtbuluser
+      POSTGRES_PASSWORD: 123
