@@ -4,6 +4,7 @@ import com.sazark.kykbecayis.domain.dto.PostingDto;
 import com.sazark.kykbecayis.domain.entities.Dorm;
 import com.sazark.kykbecayis.domain.entities.Posting;
 import com.sazark.kykbecayis.domain.entities.User;
+import com.sazark.kykbecayis.mappers.impl.PostingMapper;
 import com.sazark.kykbecayis.repositories.DormRepository;
 import com.sazark.kykbecayis.repositories.PostingRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class PostingServiceTest {
@@ -25,6 +27,9 @@ class PostingServiceTest {
 
     @Mock
     private DormRepository dormRepository;
+
+    @Mock
+    private PostingMapper postingMapper;
 
     @InjectMocks
     private PostingService postingService;
@@ -47,6 +52,23 @@ class PostingServiceTest {
                 .sourceDorm(sourceDorm)
                 .targetDormIds(List.of(2L))
                 .build();
+
+        when(postingMapper.toEntity(any(PostingDto.class))).thenAnswer(invocation -> {
+            PostingDto dtoArg = invocation.getArgument(0);
+            Posting p = new Posting();
+            p.setUser(dtoArg.getUser());
+            p.setSourceDorm(dtoArg.getSourceDorm());
+            return p;
+        });
+
+        when(postingMapper.toDTO(any(Posting.class))).thenAnswer(invocation -> {
+            Posting p = invocation.getArgument(0);
+            PostingDto resultDto = new PostingDto();
+            resultDto.setId(p.getId());
+            resultDto.setUser(p.getUser());
+            resultDto.setSourceDorm(p.getSourceDorm());
+            return resultDto;
+        });
     }
 
     @Test
