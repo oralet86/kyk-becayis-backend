@@ -20,4 +20,10 @@ public class DormJsonReader {
         return mapper.readValue(is, new TypeReference<>() {
         });
     }
+
+    public List<DormJsonDto> readDormJson(InputStream is) throws Exception {
+        if (is == null) throw new IllegalStateException("JSON input stream is null.");
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(is, new TypeReference<>() {});
+    }
 }
