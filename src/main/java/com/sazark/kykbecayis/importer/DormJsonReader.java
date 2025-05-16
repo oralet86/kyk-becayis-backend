@@ -2,6 +2,7 @@ package com.sazark.kykbecayis.importer;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sazark.kykbecayis.domain.dto.json.DormJsonDto;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;

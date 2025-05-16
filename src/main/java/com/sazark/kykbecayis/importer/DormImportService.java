@@ -1,5 +1,7 @@
 package com.sazark.kykbecayis.importer;
 
+import com.sazark.kykbecayis.domain.dto.json.BlockJsonDto;
+import com.sazark.kykbecayis.domain.dto.json.DormJsonDto;
 import com.sazark.kykbecayis.domain.entities.Block;
 import com.sazark.kykbecayis.domain.entities.Dorm;
 import com.sazark.kykbecayis.domain.entities.enums.GenderType;
@@ -34,8 +36,10 @@ public class DormImportService {
             try {
                 GenderType blockType = parseGenderType(blockDto.getType());
                 Block block = Block.builder()
+                        .name(blockDto.getName())
                         .type(blockType)
                         .fullAddress(blockDto.getAddress())
+                        .location(blockDto.getLocation())
                         .city(blockDto.getCity())
                         .build();
                 blocks.add(block);
@@ -50,6 +54,7 @@ public class DormImportService {
                 .phoneNumber(dto.getPhone())
                 .fullAddress(dto.getAddress())
                 .city(dto.getCity())
+                .location(dto.getLocation())
                 .blocks(blocks)
                 .build();
 

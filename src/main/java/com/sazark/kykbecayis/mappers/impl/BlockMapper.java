@@ -24,6 +24,8 @@ public class BlockMapper implements Mapper<Block, BlockDto> {
                 .type(block.getType())
                 .fullAddress(block.getFullAddress())
                 .city(block.getCity())
+                .location(block.getLocation())
+                .name(block.getName())
                 .dormId(block.getDorm().getId())
                 .build();
     }
@@ -37,6 +39,8 @@ public class BlockMapper implements Mapper<Block, BlockDto> {
                 .type(blockDto.getType())
                 .fullAddress(blockDto.getFullAddress())
                 .city(blockDto.getCity())
+                .location(blockDto.getLocation())
+                .name(blockDto.getName())
                 .dorm(blockDto.getDormId() != null
                         ? dormRepository.findById(blockDto.getDormId()).orElse(null)
                         : null)
