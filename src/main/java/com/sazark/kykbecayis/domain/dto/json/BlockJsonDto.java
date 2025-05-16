@@ -1,12 +1,23 @@
 package com.sazark.kykbecayis.domain.dto.json;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
 public class BlockJsonDto {
-    private String Name;
-    private String Type;
-    private String Address;
-    private String Location;
-    private String City;
+
+    @JsonProperty("Name")
+    private String name;
+
+    @JsonProperty("Type")
+    private String type;
+
+    @JsonProperty("Address")
+    private String address;
+
+    @JsonProperty("Location")
+    private String location;
+
+    @JsonProperty("City")
+    private String city;
 }

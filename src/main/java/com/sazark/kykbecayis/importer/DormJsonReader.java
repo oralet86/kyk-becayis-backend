@@ -13,7 +13,10 @@ public class DormJsonReader {
 
     public List<DormJsonDto> readDormJson() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
-        InputStream is = getClass().getClassLoader().getResourceAsStream("dorms.json");
+        InputStream is = getClass().getClassLoader().getResourceAsStream("data/dorms.json");
+        if (is == null) {
+            throw new IllegalStateException("dorms.json not found in resources/data/");
+        }
         return mapper.readValue(is, new TypeReference<>() {
         });
     }
