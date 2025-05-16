@@ -1,0 +1,67 @@
+[
+  {
+    "Name": "AYVALIK ÖĞRENCİ YURDU",
+    "Type": "Karma",
+    "Phone": "0(266) 331-06-00",
+    "Address": "ALİ ÇETİNKAYA MAHALLESİ ATATÜRK BULVARI NO:431 AYVALIK/ BALIKESİR",
+    "City": "Balikesir",
+    "Location": "https://www.google.com/maps/search/?api=1&query=39.33447400785025,%2026.718962355185454",
+    "Blocks": [
+      {
+        "Name": "A BLOK",
+        "Type": "Kız",
+        "Address": "SAKARYA MAHALLESİ AYVALIK /BALIKESİR",
+        "Location": "https://www.google.com/maps/search/?api=1&query=39.33459578324499,%2026.718716360420558",
+        "City": "Balikesir"
+      },
+      {
+        "Name": "B BLOK",
+        "Type": "Erkek",
+        "Address": "SAKARYA MAHALLESİ AYVALIK /BALIKESİR",
+        "Location": "https://www.google.com/maps/search/?api=1&query=39.334697149739235,%2026.71904631294558",
+        "City": "Balikesir"
+      }
+    ]
+  },
+  {
+    "Name": "BANDIRMA ÖĞRENCİ YURDU",
+    "Type": "Kız",
+    "Phone": "0(266) 721-30-88",
+    "Address": "600 EVLER MAH. ATATÜRK CD. 23.SK. NO:121 Bandırma/BALIKESİR",
+    "City": "Balikesir",
+    "Location": "https://www.google.com/maps/search/?api=1&query=40.33331,27.99445",
+    "Blocks": [
+      {
+        "Name": "A BLOK",
+        "Type": "Kız",
+        "Address": "600 EVLER MAH. ATATÜRK CD. 23.SK. NO:121 Bandırma/BALIKESİR",
+        "Location": "https://www.google.com/maps/search/?api=1&query=40.33331,27.99445",
+        "City": "Balikesir"
+      }
+    ]
+  },
+  {
+    "Name": "AYHAN SONGAR ÖĞRENCİ YURDU",
+    "Type": "Erkek",
+    "Phone": "0(266) 715-20-04",
+    "Address": "KAYACIK MAH. ÇANAKKALE ŞEHİTLERİ SOK. No:6/2 B BLOK AYHAN SONGAR YURT MÜDÜRLÜĞÜ BANDIRMA BALIKESİR",
+    "City": "Balikesir",
+    "Location": "https://www.google.com/maps/search/?api=1&query=40.349367138085356,%2028.007398545742035",
+    "Blocks": [
+      {
+        "Name": "A BLOK",
+        "Type": "Erkek",
+        "Address": "KAYACIK MAH. ÇANAKKALE ŞEHİTLERİ CD. KÜME EVLERİ CK1-2 BLOK Bandırma/BALIKESİR",
+        "Location": "https://www.google.com/maps/search/?api=1&query=40.34942740117635,%2028.006998126548297",
+        "City": "Balikesir"
+      },
+      {
+        "Name": "B BLOK",
+        "Type": "Erkek",
+        "Address": "KAYACIK MAH. ÇANAKKALE ŞEHİTLERİ CD. KÜME EVLERİ CK1-3 BLOK Bandırma/BALIKESİR",
+        "Location": "https://www.google.com/maps/search/?api=1&query=40.349368671190575,%2028.007601387798786",
+        "City": "Balikesir"
+      }
+    ]
+  }
+]
