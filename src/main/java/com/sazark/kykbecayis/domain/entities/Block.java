@@ -34,8 +34,6 @@ public class Block {
     @Column(nullable = false)
     private String name;
 
-    @NotBlank
-    @Column(nullable = false)
     private String location;
 
     @ManyToOne

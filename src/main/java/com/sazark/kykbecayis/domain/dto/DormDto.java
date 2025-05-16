@@ -24,9 +24,7 @@ public class DormDto {
     private String city;
     @NotBlank
     private String name;
-    @NotBlank
     private String phoneNumber;
-    @NotBlank
     private String location;
 
     private List<Long> blockIds;

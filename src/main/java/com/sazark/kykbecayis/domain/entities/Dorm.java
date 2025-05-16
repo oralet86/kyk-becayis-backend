@@ -36,12 +36,8 @@ public class Dorm {
     @Column(nullable = false)
     private String name;
 
-    @NotBlank
-    @Column(nullable = false)
     private String phoneNumber;
 
-    @NotBlank
-    @Column(nullable = false)
     private String location;
 
     @OneToMany(mappedBy = "dorm", cascade = CascadeType.ALL, orphanRemoval = true)

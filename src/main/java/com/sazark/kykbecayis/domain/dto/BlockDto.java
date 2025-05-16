@@ -24,6 +24,5 @@ public class BlockDto {
     private Long dormId;
     @NotBlank
     private String name;
-    @NotBlank
     private String location;
 }
