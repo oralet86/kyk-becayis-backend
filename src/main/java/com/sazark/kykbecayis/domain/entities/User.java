@@ -2,6 +2,7 @@ package com.sazark.kykbecayis.domain.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import shaded_package.javax.validation.constraints.NotBlank;
 
 import java.util.List;
 
@@ -16,12 +17,24 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(unique = true, nullable = false)
     private String firebaseUID;
+
+    @NotBlank
+    @Column(nullable = false)
     private String firstname;
+
+    @NotBlank
+    @Column(nullable = false)
     private String surname;
 
+    @NotBlank
+    @Column(nullable = false)
     private String email;
+
+    @NotBlank
+    @Column(nullable = false)
     private String phone;
 
     @OneToOne
