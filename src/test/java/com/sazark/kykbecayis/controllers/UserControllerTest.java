@@ -8,7 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -29,8 +30,16 @@ class UserControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @Autowired
     private UserService userService;
+
+    @TestConfiguration
+    static class UserControllerTestContextConfiguration {
+        @Bean
+        public UserService userService() {
+            return Mockito.mock(UserService.class);
+        }
+    }
 
     @Test
     @DisplayName("POST /api/users - Success")
