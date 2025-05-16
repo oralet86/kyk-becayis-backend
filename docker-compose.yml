@@ -1,10 +1,15 @@
 services:
-  db:
-    image: postgres:15
+  postgres:
+    image: postgres
+    container_name: my-postgres
+    environment:
+      POSTGRES_USER: your_username
+      POSTGRES_PASSWORD: your_password
+      POSTGRES_DB: your_database_name
     ports:
       - "5432:5432"
-    restart: always
-    environment:
-      POSTGRES_DB: yurtbul
-      POSTGRES_USER: yurtbuluser
-      POSTGRES_PASSWORD: 123
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
