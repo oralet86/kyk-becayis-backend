@@ -7,11 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(properties = {
-        "spring.datasource.url=jdbc:h2:mem:testdb",  // use in-memory DB just for this test
-        "spring.datasource.driver-class-name=org.h2.Driver",
-        "spring.jpa.hibernate.ddl-auto=none"
-})
+@SpringBootTest()
 public class FirebaseConnectionTest {
     @Test
     public void testFirebaseIsInitialized() {
