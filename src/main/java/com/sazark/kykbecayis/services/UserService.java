@@ -2,6 +2,7 @@ package com.sazark.kykbecayis.services;
 
 import com.sazark.kykbecayis.domain.dto.UserDto;
 import com.sazark.kykbecayis.domain.entities.User;
+import com.sazark.kykbecayis.exception.InvalidEmailException;
 import com.sazark.kykbecayis.mappers.impl.UserMapper;
 import com.sazark.kykbecayis.repositories.UserRepository;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,11 @@ public class UserService {
     }
 
     public UserDto create(UserDto userDto) {
+        if (!userDto.getEmail().toLowerCase().trim().endsWith(".edu.tr")) {
+            throw new InvalidEmailException("Email must end with '.edu.tr' to be eligible.");
+        }
+
+        // If all checks have been passed
         User user = userMapper.toEntity(userDto);
         User savedUser = userRepository.save(user);
         return userMapper.toDTO(savedUser);
