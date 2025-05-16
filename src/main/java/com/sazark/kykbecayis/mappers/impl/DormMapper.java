@@ -29,6 +29,7 @@ public class DormMapper implements Mapper<Dorm, DormDto> {
                 .city(dorm.getCity())
                 .name(dorm.getName())
                 .phoneNumber(String.valueOf(dorm.getPhoneNumber()))
+                .location(dorm.getLocation())
                 .blockIds(dorm.getBlocks() != null
                         ? dorm.getBlocks().stream().map(Block::getId).toList()
                         : new ArrayList<>())
@@ -46,6 +47,7 @@ public class DormMapper implements Mapper<Dorm, DormDto> {
                 .city(dormDto.getCity())
                 .name(dormDto.getName())
                 .phoneNumber(dormDto.getPhoneNumber())
+                .location(dormDto.getLocation())
                 .blocks(dormDto.getBlockIds() != null
                         ? blockRepository.findAllById(dormDto.getBlockIds())
                         : new ArrayList<>())
