@@ -2,14 +2,13 @@ package com.sazark.kykbecayis.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sazark.kykbecayis.domain.dto.PostingDto;
-import com.sazark.kykbecayis.domain.entities.Dorm;
-import com.sazark.kykbecayis.domain.entities.User;
 import com.sazark.kykbecayis.services.PostingService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -25,20 +24,28 @@ class PostingControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
-    private PostingService postingService;
-
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private PostingService postingService;
+
+    @TestConfiguration
+    static class PostingControllerTestContextConfiguration {
+        @Bean
+        public PostingService postingService() {
+            return Mockito.mock(PostingService.class);
+        }
+    }
+
     private PostingDto getSampleDto() {
-        User user = new User(); user.setId(1L);
-        Dorm dorm = Dorm.builder().id(1L).build();
         return PostingDto.builder()
                 .id(10L)
-                .user(user)
-                .sourceDorm(dorm)
+                .userId(1L)
+                .sourceDormId(1L)
                 .targetDormIds(List.of(2L))
+                .isValid(true)
+                .date("2025-05-16")
                 .build();
     }
 

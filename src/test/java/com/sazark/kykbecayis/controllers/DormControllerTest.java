@@ -6,9 +6,11 @@ import com.sazark.kykbecayis.domain.entities.enums.GenderType;
 import com.sazark.kykbecayis.services.DormService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -30,11 +32,19 @@ class DormControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
-    private DormService dormService;
-
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private DormService dormService;
+
+    @TestConfiguration
+    static class DormControllerTestContextConfiguration {
+        @Bean
+        public DormService dormService() {
+            return Mockito.mock(DormService.class);
+        }
+    }
 
     private DormDto dto;
 
