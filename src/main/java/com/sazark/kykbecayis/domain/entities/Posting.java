@@ -2,7 +2,9 @@ package com.sazark.kykbecayis.domain.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import shaded_package.javax.validation.constraints.NotNull;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -15,6 +17,14 @@ public class Posting {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @NotNull
+    @Column(nullable = false)
+    private Boolean isValid;
+
+    @NotNull
+    @Column(nullable = false)
+    private LocalDate date;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -31,4 +41,11 @@ public class Posting {
             inverseJoinColumns = @JoinColumn(name = "dorm_id")
     )
     private List<Dorm> targetDorms;
+
+    @PrePersist
+    protected void onCreate() {
+        if (date == null) {
+            date = LocalDate.now();
+        }
+    }
 }

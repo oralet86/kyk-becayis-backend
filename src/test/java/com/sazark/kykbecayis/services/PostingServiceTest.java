@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,27 +49,38 @@ class PostingServiceTest {
         targetDorm = Dorm.builder().id(2L).build();
 
         dto = PostingDto.builder()
-                .user(user)
-                .sourceDorm(sourceDorm)
+                .id(10L)
+                .userId(1L)
+                .sourceDormId(1L)
                 .targetDormIds(List.of(2L))
+                .isValid(true)
+                .date("2025-05-16")
                 .build();
 
         when(postingMapper.toEntity(any(PostingDto.class))).thenAnswer(invocation -> {
             PostingDto dtoArg = invocation.getArgument(0);
-            Posting p = new Posting();
-            p.setUser(dtoArg.getUser());
-            p.setSourceDorm(dtoArg.getSourceDorm());
-            return p;
+            return Posting.builder()
+                    .id(dtoArg.getId())
+                    .isValid(dtoArg.getIsValid())
+                    .date(LocalDate.parse(dtoArg.getDate()))
+                    .user(user)
+                    .sourceDorm(sourceDorm)
+                    .targetDorms(List.of(targetDorm))
+                    .build();
         });
 
         when(postingMapper.toDTO(any(Posting.class))).thenAnswer(invocation -> {
             Posting p = invocation.getArgument(0);
-            PostingDto resultDto = new PostingDto();
-            resultDto.setId(p.getId());
-            resultDto.setUser(p.getUser());
-            resultDto.setSourceDorm(p.getSourceDorm());
-            return resultDto;
+            return PostingDto.builder()
+                    .id(p.getId())
+                    .userId(p.getUser().getId())
+                    .sourceDormId(p.getSourceDorm().getId())
+                    .targetDormIds(p.getTargetDorms().stream().map(Dorm::getId).toList())
+                    .isValid(p.getIsValid())
+                    .date(p.getDate().toString())
+                    .build();
         });
+
     }
 
     @Test
@@ -82,7 +94,6 @@ class PostingServiceTest {
 
         PostingDto result = postingService.create(dto);
         assertEquals(10L, result.getId());
-        assertEquals(user, result.getUser());
     }
 
     @Test
@@ -92,6 +103,8 @@ class PostingServiceTest {
                 .user(user)
                 .sourceDorm(sourceDorm)
                 .targetDorms(List.of(targetDorm))
+                .isValid(true)
+                .date(LocalDate.now())
                 .build();
 
         when(postingRepository.findById(10L)).thenReturn(Optional.of(posting));
