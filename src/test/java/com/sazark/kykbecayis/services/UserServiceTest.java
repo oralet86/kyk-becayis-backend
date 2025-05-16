@@ -27,10 +27,10 @@ class UserServiceTest {
 
     @Test
     void createUser_savesAndReturnsDto() {
-        UserDto inputDto = UserDto.builder().firstname("John").build();
+        UserDto inputDto = UserDto.builder().firstname("John").email("test@test.edu.tr").build();
         User user = new User();
         User savedUser = new User();
-        UserDto outputDto = UserDto.builder().id(1L).firstname("John").build();
+        UserDto outputDto = UserDto.builder().id(1L).firstname("John").email("test@test.edu.tr").build();
 
         when(userMapper.toEntity(inputDto)).thenReturn(user);
         when(userRepository.save(user)).thenReturn(savedUser);
