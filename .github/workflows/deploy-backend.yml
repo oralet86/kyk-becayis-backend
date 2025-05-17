@@ -32,7 +32,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           source: target/app.jar
-          target: /home/user/backend/app.jar
+          target: /home/user/backend/
 
       - name: Restart backend service
         uses: appleboy/ssh-action@v0.1.6
