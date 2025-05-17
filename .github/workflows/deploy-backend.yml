@@ -19,10 +19,6 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Create firebase_key.json file from secret
-        run: |
-          echo "${{ secrets.FIREBASE_KEY_JSON }}" > src/main/resources/firebase_key.json
-
       - name: Build Spring Boot app
         run: chmod +x ./mvnw && ./mvnw clean package -DskipTests
 
