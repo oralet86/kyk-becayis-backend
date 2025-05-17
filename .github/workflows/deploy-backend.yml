@@ -20,7 +20,7 @@ jobs:
           java-version: '17'
 
       - name: Build Spring Boot app
-        run: ./mvnw clean package -DskipTests
+        run: chmod +x ./mvnw && ./mvnw clean package -DskipTests
 
       - name: Rename jar file to app.jar
         run: mv target/kykbecayis-*.jar target/app.jar
