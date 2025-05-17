@@ -2,8 +2,9 @@ package com.sazark.kykbecayis.repositories;
 
 import com.sazark.kykbecayis.domain.entities.Dorm;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface DormRepository extends JpaRepository<Dorm, Long> {
+public interface DormRepository extends JpaRepository<Dorm, Long>, JpaSpecificationExecutor<Dorm> {
 }

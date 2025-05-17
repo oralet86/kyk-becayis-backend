@@ -36,6 +36,14 @@ public class DormController {
         return ResponseEntity.ok(dormService.findAll());
     }
 
+    @GetMapping("/filter")
+    public ResponseEntity<List<DormDto>> filterDorms(
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) String name) {
+        return ResponseEntity.ok(dormService.filterDorms(type, city, name));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<DormDto> updateDorm(@PathVariable Long id, @RequestBody DormDto dormDto) {
         DormDto updatedDorm = dormService.update(id, dormDto);

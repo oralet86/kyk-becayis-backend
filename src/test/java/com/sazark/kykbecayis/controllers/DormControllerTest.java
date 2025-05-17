@@ -103,6 +103,30 @@ class DormControllerTest {
     }
 
     @Test
+    void testFilterDorms_withMultipleCriteria() throws Exception {
+        DormDto dto = DormDto.builder()
+                .id(1L)
+                .type(GenderType.MALE)
+                .city("Ankara")
+                .name("Mehmetçik Yurdu")
+                .fullAddress("Some address")
+                .build();
+
+        Mockito.when(dormService.filterDorms("MALE", "anka", "mehmet")).thenReturn(List.of(dto));
+
+        mockMvc.perform(get("/api/dorms/filter")
+                        .param("type", "MALE")
+                        .param("city", "anka")
+                        .param("name", "mehmet"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id").value(1L))
+                .andExpect(jsonPath("$[0].city").value("Ankara"))
+                .andExpect(jsonPath("$[0].type").value("MALE"))
+                .andExpect(jsonPath("$[0].name").value("Mehmetçik Yurdu"));
+    }
+
+    @Test
     void testUpdateDorm_found() throws Exception {
         when(dormService.update(eq(1L), any(DormDto.class))).thenReturn(dto);
 

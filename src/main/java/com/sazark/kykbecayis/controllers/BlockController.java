@@ -31,6 +31,11 @@ public class BlockController {
         return (block != null) ? ResponseEntity.ok(block) : ResponseEntity.notFound().build();
     }
 
+    @GetMapping("/filter")
+    public ResponseEntity<List<BlockDto>> getBlocksByDormId(@RequestParam Long dormId) {
+        return ResponseEntity.ok(blockService.findByDormId(dormId));
+    }
+
     @GetMapping
     public ResponseEntity<List<BlockDto>> getAllBlocks() {
         return ResponseEntity.ok(blockService.findAll());

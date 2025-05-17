@@ -98,6 +98,21 @@ class BlockControllerTest {
     }
 
     @Test
+    void testFilterBlocksByDormId() throws Exception {
+        BlockDto dto = getSampleDto();
+
+        Mockito.when(blockService.findByDormId(5L)).thenReturn(List.of(dto));
+
+        mockMvc.perform(get("/api/blocks/filter")
+                        .param("dormId", "5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id").value(1L))
+                .andExpect(jsonPath("$[0].dormId").value(5L));
+    }
+
+
+    @Test
     void testUpdateBlock_found() throws Exception {
         BlockDto dto = getSampleDto();
 

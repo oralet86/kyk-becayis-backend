@@ -48,6 +48,15 @@ public class BlockService {
                 .collect(Collectors.toList());
     }
 
+    public List<BlockDto> findByDormId(Long dormId) {
+        return blockRepository.findByDormId(dormId)
+                .stream()
+                .map(blockMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+
+
     public boolean delete(Long id) {
         if (!blockRepository.existsById(id)) {
             return false;

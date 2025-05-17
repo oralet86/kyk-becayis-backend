@@ -2,10 +2,13 @@ package com.sazark.kykbecayis.services;
 
 import com.sazark.kykbecayis.domain.dto.DormDto;
 import com.sazark.kykbecayis.domain.entities.Dorm;
+import com.sazark.kykbecayis.domain.entities.enums.GenderType;
 import com.sazark.kykbecayis.mappers.impl.DormMapper;
 import com.sazark.kykbecayis.repositories.DormRepository;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,6 +47,28 @@ public class DormService {
     public List<DormDto> findAll() {
         return dormRepository.findAll()
                 .stream()
+                .map(dormMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<DormDto> filterDorms(String type, String city, String name) {
+        return dormRepository.findAll((root, query, cb) -> {
+                    List<Predicate> predicates = new ArrayList<>();
+
+                    if (type != null) {
+                        predicates.add(cb.equal(root.get("type"), GenderType.valueOf(type.toUpperCase())));
+                    }
+
+                    if (city != null) {
+                        predicates.add(cb.like(cb.lower(root.get("city")), "%" + city.toLowerCase() + "%"));
+                    }
+
+                    if (name != null) {
+                        predicates.add(cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
+                    }
+
+                    return cb.and(predicates.toArray(new Predicate[0]));
+                }).stream()
                 .map(dormMapper::toDTO)
                 .collect(Collectors.toList());
     }
