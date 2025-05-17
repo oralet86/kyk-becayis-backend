@@ -23,7 +23,7 @@ jobs:
         run: chmod +x ./mvnw && ./mvnw clean package -DskipTests
 
       - name: Rename jar file to app.jar
-        run: mv target/kykbecayis-*.jar target/app.jar
+        run: mv target/kykbecayis-*.jar app.jar
 
       - name: Copy artifact to server
         uses: appleboy/scp-action@v0.1.3
