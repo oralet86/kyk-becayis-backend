@@ -1,11 +1,11 @@
 services:
   postgres:
     image: postgres
-    container_name: my-postgres
+    container_name: becayis_db
     environment:
-      POSTGRES_USER: your_username
-      POSTGRES_PASSWORD: your_password
-      POSTGRES_DB: your_database_name
+      POSTGRES_USER: becayis
+      POSTGRES_PASSWORD: eecm7777
+      POSTGRES_DB: becayis_db
     ports:
       - "5432:5432"
     volumes:
