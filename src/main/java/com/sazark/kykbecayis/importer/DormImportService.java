@@ -9,6 +9,7 @@ import com.sazark.kykbecayis.repositories.DormRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,9 +20,12 @@ public class DormImportService {
     private final DormRepository dormRepository;
     private final DormJsonReader dormJsonReader;
 
-    public void importDormsFromJson() throws Exception {
-        List<DormJsonDto> dorms = dormJsonReader.readDormJson();
+    public void importDormsFromJson(InputStream inputStream) throws Exception {
+        List<DormJsonDto> dorms = dormJsonReader.readDormJson(inputStream);
+        saveDorms(dorms);
+    }
 
+    private void saveDorms(List<DormJsonDto> dorms) {
         for (DormJsonDto dto : dorms) {
             Dorm dorm = mapDorm(dto);
             dormRepository.save(dorm);
