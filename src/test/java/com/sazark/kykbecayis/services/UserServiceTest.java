@@ -17,20 +17,24 @@ class UserServiceTest {
     private UserRepository userRepository;
     private UserMapper userMapper;
     private UserService userService;
+    private FirebaseService firebaseService;
 
     @BeforeEach
     void setup() {
         userRepository = mock(UserRepository.class);
         userMapper = mock(UserMapper.class);
-        userService = new UserService(userRepository, userMapper);
+        firebaseService = mock(FirebaseService.class);
+        userService = new UserService(userRepository, userMapper, firebaseService);
     }
 
     @Test
-    void createUser_savesAndReturnsDto() {
-        UserDto inputDto = UserDto.builder().firstname("John").email("test@test.edu.tr").build();
+    void createUser_savesAndReturnsDto() throws Exception {
+        UserDto inputDto = UserDto.builder().firstname("John").email("test@test.edu.tr").firebaseUID("123").build();
         User user = new User();
         User savedUser = new User();
         UserDto outputDto = UserDto.builder().id(1L).firstname("John").email("test@test.edu.tr").build();
+
+        doNothing().when(firebaseService).validateUID("123");
 
         when(userMapper.toEntity(inputDto)).thenReturn(user);
         when(userRepository.save(user)).thenReturn(savedUser);

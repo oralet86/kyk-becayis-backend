@@ -1,6 +1,5 @@
 package com.sazark.kykbecayis.services;
 
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.sazark.kykbecayis.domain.dto.UserDto;
 import com.sazark.kykbecayis.domain.entities.User;
@@ -17,10 +16,12 @@ import java.util.stream.Collectors;
 public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final FirebaseService firebaseService;
 
-    public UserService(UserRepository userRepository, UserMapper userMapper) {
+    public UserService(UserRepository userRepository, UserMapper userMapper, FirebaseService firebaseService) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.firebaseService = firebaseService;
     }
 
     public UserDto create(UserDto userDto) {
@@ -29,7 +30,7 @@ public class UserService {
         }
 
         try {
-            FirebaseAuth.getInstance().getUser(userDto.getFirebaseUID());
+            firebaseService.validateUID(userDto.getFirebaseUID());
         } catch (FirebaseAuthException e) {
             throw new InvalidUIDException("Firebase UID validation unsuccessful");
         }

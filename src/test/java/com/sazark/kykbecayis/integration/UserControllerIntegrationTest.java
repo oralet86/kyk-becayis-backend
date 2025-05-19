@@ -2,20 +2,29 @@ package com.sazark.kykbecayis.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sazark.kykbecayis.domain.dto.UserDto;
+import com.sazark.kykbecayis.domain.entities.enums.Gender;
+import com.sazark.kykbecayis.services.FirebaseService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Import(UserControllerIntegrationTest.TestFirebaseConfig.class)
 public class UserControllerIntegrationTest {
 
     @Autowired
@@ -23,6 +32,16 @@ public class UserControllerIntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @TestConfiguration
+    static class TestFirebaseConfig {
+        @Bean
+        public FirebaseService firebaseService() throws Exception {
+            FirebaseService mock = mock(FirebaseService.class);
+            doNothing().when(mock).validateUID(anyString());
+            return mock;
+        }
+    }
 
     @Test
     void createUser_success() throws Exception {
@@ -32,6 +51,8 @@ public class UserControllerIntegrationTest {
                 .surname("Smith")
                 .email("alice@example.edu.tr")
                 .phone("555-1234")
+                .city("Ankara")
+                .gender(Gender.MALE)
                 .build();
 
         mockMvc.perform(post("/api/users")
@@ -50,6 +71,8 @@ public class UserControllerIntegrationTest {
                 .surname("")
                 .email("")
                 .phone("")
+                .city("")
+                .gender(null)
                 .build();
 
         mockMvc.perform(post("/api/users")
@@ -66,6 +89,8 @@ public class UserControllerIntegrationTest {
                 .surname("Brown")
                 .email("bob@example.com")
                 .phone("1234567890")
+                .city("Ankara")
+                .gender(Gender.MALE)
                 .build();
 
         mockMvc.perform(post("/api/users")
@@ -76,7 +101,7 @@ public class UserControllerIntegrationTest {
 
     @Test
     void getUser_success() throws Exception {
-        UserDto created = createAndReturnUser("uid-get", "Charlie", "Clark", "charlie@mail.edu.tr", "555-0000");
+        UserDto created = createAndReturnUser("uid-get", "Charlie", "Clark", "charlie@mail.edu.tr", "555-0000", "Ankara", Gender.MALE);
 
         mockMvc.perform(get("/api/users/" + created.getId()))
                 .andExpect(status().isOk())
@@ -91,7 +116,7 @@ public class UserControllerIntegrationTest {
 
     @Test
     void getAllUsers_success() throws Exception {
-        createAndReturnUser("uid-list", "Dora", "Dane", "dora@mail.edu.tr", "444-8888");
+        createAndReturnUser("uid-list", "Dora", "Dane", "dora@mail.edu.tr", "444-8888", "Ankara", Gender.MALE);
 
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isOk())
@@ -100,7 +125,7 @@ public class UserControllerIntegrationTest {
 
     @Test
     void updateUser_success() throws Exception {
-        UserDto user = createAndReturnUser("uid-update", "Eve", "Evans", "eve@mail.edu.tr", "111-2222");
+        UserDto user = createAndReturnUser("uid-update", "Eve", "Evans", "eve@mail.edu.tr", "111-2222", "Ankara", Gender.MALE);
 
         UserDto updatedDto = UserDto.builder()
                 .id(user.getId())
@@ -109,6 +134,8 @@ public class UserControllerIntegrationTest {
                 .surname("Evans")
                 .email("eve@mail.edu.tr")
                 .phone("111-2222")
+                .city("Ankara")
+                .gender(Gender.MALE)
                 .build();
 
         mockMvc.perform(put("/api/users/" + user.getId())
@@ -136,7 +163,7 @@ public class UserControllerIntegrationTest {
 
     @Test
     void deleteUser_success() throws Exception {
-        UserDto user = createAndReturnUser("uid-delete", "Frank", "Ford", "frank@mail.edu.tr", "222-3333");
+        UserDto user = createAndReturnUser("uid-delete", "Frank", "Ford", "frank@mail.edu.tr", "222-3333", "Ankara", Gender.MALE);
 
         mockMvc.perform(delete("/api/users/" + user.getId()))
                 .andExpect(status().isNoContent());
@@ -148,13 +175,15 @@ public class UserControllerIntegrationTest {
                 .andExpect(status().isNotFound());
     }
 
-    private UserDto createAndReturnUser(String firebaseUID, String firstname, String surname, String email, String phone) throws Exception {
+    private UserDto createAndReturnUser(String firebaseUID, String firstname, String surname, String email, String phone, String city, Gender gender) throws Exception {
         UserDto dto = UserDto.builder()
                 .firebaseUID(firebaseUID)
                 .firstname(firstname)
                 .surname(surname)
                 .email(email)
                 .phone(phone)
+                .city(city)
+                .gender(gender)
                 .build();
 
         String response = mockMvc.perform(post("/api/users")
