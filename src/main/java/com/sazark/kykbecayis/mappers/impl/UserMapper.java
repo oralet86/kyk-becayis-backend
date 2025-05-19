@@ -34,6 +34,8 @@ public class UserMapper implements Mapper<User, UserDto> {
                 .surname(user.getSurname())
                 .email(user.getEmail())
                 .phone(user.getPhone())
+                .gender(user.getGender())
+                .city(user.getCity())
                 .currentDormId(user.getCurrentDorm() != null
                         ? user.getCurrentDorm().getId()
                         : null)
@@ -57,6 +59,8 @@ public class UserMapper implements Mapper<User, UserDto> {
                 .surname(userDto.getSurname())
                 .email(userDto.getEmail())
                 .phone(userDto.getPhone())
+                .gender(userDto.getGender())
+                .city(userDto.getCity())
                 .currentDorm(userDto.getCurrentDormId() != null
                         ? dormRepository.findById(userDto.getCurrentDormId()).orElse(null)
                         : null)

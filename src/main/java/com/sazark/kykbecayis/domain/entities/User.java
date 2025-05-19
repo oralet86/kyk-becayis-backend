@@ -1,8 +1,10 @@
 package com.sazark.kykbecayis.domain.entities;
 
+import com.sazark.kykbecayis.domain.entities.enums.Gender;
 import jakarta.persistence.*;
 import lombok.*;
 import shaded_package.javax.validation.constraints.NotBlank;
+import shaded_package.javax.validation.constraints.NotNull;
 
 import java.util.List;
 
@@ -36,6 +38,15 @@ public class User {
     @NotBlank
     @Column(nullable = false)
     private String phone;
+
+    @NotBlank
+    @Column(nullable = false)
+    private String city;
+
+    @NotNull
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
 
     @OneToOne
     @JoinColumn(name = "current_dorm_id")
