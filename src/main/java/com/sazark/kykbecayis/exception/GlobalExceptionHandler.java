@@ -12,4 +12,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> invalidEmailExceptionHandler(InvalidEmailException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
+
+    public ResponseEntity<String> invalidUIDExceptionHandler(InvalidUIDException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 }
