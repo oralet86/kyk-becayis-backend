@@ -48,7 +48,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "current_dorm_id")
     private Dorm currentDorm;
 
