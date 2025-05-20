@@ -71,4 +71,16 @@ public class UserService {
         userRepository.deleteById(id);
         return true;
     }
+
+    public List<UserDto> filterUsers(String firebaseUID) {
+        if (firebaseUID == null || firebaseUID.isEmpty()) {
+            throw new IllegalArgumentException("firebaseUID must not be null or empty");
+        }
+
+        return userRepository.findAll((root, query, cb) ->
+                        cb.equal(root.get("firebaseUID"), firebaseUID)
+                ).stream()
+                .map(userMapper::toDTO)
+                .collect(Collectors.toList());
+    }
 }

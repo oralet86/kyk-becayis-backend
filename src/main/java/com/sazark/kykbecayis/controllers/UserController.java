@@ -32,9 +32,11 @@ public class UserController {
         return (user != null) ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
     }
 
-    @GetMapping
-    public ResponseEntity<List<UserDto>> getAllUsers() {
-        return ResponseEntity.ok(userService.findAll());
+    @GetMapping("/filter")
+    public ResponseEntity<List<UserDto>> filterUsers(
+            @RequestParam(required = false) String firebaseUID
+    ) {
+        return ResponseEntity.ok(userService.filterUsers(firebaseUID));
     }
 
     @PutMapping("/{id}")

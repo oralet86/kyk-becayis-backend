@@ -103,29 +103,6 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/users - Empty List")
-    void testGetAllUsers_Empty() throws Exception {
-        Mockito.when(userService.findAll()).thenReturn(Collections.emptyList());
-
-        mockMvc.perform(get("/api/users"))
-                .andExpect(status().isOk())
-                .andExpect(content().json("[]"));
-    }
-
-    @Test
-    @DisplayName("GET /api/users - Non-empty List")
-    void testGetAllUsers_NonEmpty() throws Exception {
-        UserDto u1 = UserDto.builder().id(1L).firstname("A").surname("B").email("a@b.com").phone("111").currentDormId(null).postingIds(Collections.emptyList()).build();
-        UserDto u2 = UserDto.builder().id(2L).firstname("C").surname("D").email("c@d.com").phone("222").currentDormId(null).postingIds(Collections.emptyList()).build();
-        List<UserDto> users = List.of(u1, u2);
-        Mockito.when(userService.findAll()).thenReturn(users);
-
-        mockMvc.perform(get("/api/users"))
-                .andExpect(status().isOk())
-                .andExpect(content().json(objectMapper.writeValueAsString(users)));
-    }
-
-    @Test
     @DisplayName("PUT /api/users/{id} - Success")
     void testUpdateUser_Success() throws Exception {
         UserDto input = UserDto.builder()

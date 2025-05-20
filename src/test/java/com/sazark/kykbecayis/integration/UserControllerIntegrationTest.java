@@ -115,15 +115,6 @@ public class UserControllerIntegrationTest {
     }
 
     @Test
-    void getAllUsers_success() throws Exception {
-        createAndReturnUser("uid-list", "Dora", "Dane", "dora@mail.edu.tr", "444-8888", "Ankara", Gender.MALE);
-
-        mockMvc.perform(get("/api/users"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray());
-    }
-
-    @Test
     void updateUser_success() throws Exception {
         UserDto user = createAndReturnUser("uid-update", "Eve", "Evans", "eve@mail.edu.tr", "111-2222", "Ankara", Gender.MALE);
 
