@@ -2,6 +2,7 @@ package com.sazark.kykbecayis.config;
 
 import com.sazark.kykbecayis.firebase.FirebaseAuthFilter;
 import com.sazark.kykbecayis.repositories.UserRepository;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -32,8 +33,13 @@ public class SecurityConfig {
                 }))
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
-                .addFilterBefore(firebaseAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                .addFilterBefore(firebaseAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) ->
+                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
+                        )
+                );
 
         return http.build();
     }
