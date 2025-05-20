@@ -1,29 +1,26 @@
 package com.sazark.kykbecayis.services;
 
-import com.google.firebase.auth.FirebaseAuthException;
 import com.sazark.kykbecayis.domain.dto.UserDto;
 import com.sazark.kykbecayis.domain.entities.Posting;
 import com.sazark.kykbecayis.domain.entities.User;
 import com.sazark.kykbecayis.exception.InvalidEmailException;
-import com.sazark.kykbecayis.exception.InvalidUIDException;
 import com.sazark.kykbecayis.mappers.impl.UserMapper;
 import com.sazark.kykbecayis.repositories.UserRepository;
 import jakarta.persistence.criteria.Join;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final FirebaseService firebaseService;
 
-    public UserService(UserRepository userRepository, UserMapper userMapper, FirebaseService firebaseService) {
+    public UserService(UserRepository userRepository, UserMapper userMapper) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
-        this.firebaseService = firebaseService;
     }
 
     public UserDto create(UserDto userDto) {
@@ -31,13 +28,6 @@ public class UserService {
             throw new InvalidEmailException("Email must end with '.edu.tr' to be eligible.");
         }
 
-        try {
-            firebaseService.validateUID(userDto.getFirebaseUID());
-        } catch (FirebaseAuthException e) {
-            throw new InvalidUIDException("Firebase UID validation unsuccessful");
-        }
-
-        // If all checks have been passed
         User user = userMapper.toEntity(userDto);
         User savedUser = userRepository.save(user);
         return userMapper.toDTO(savedUser);
@@ -74,16 +64,16 @@ public class UserService {
         return true;
     }
 
-    public List<UserDto> getByFirebaseUID(String firebaseUID) {
+    public UserDto getByFirebaseUID(String firebaseUID) {
         if (firebaseUID == null || firebaseUID.isEmpty()) {
             throw new IllegalArgumentException("firebaseUID must not be null or empty");
         }
 
-        return userRepository.findAll((root, query, cb) ->
+        return userRepository.findOne((root, query, cb) ->
                         cb.equal(root.get("firebaseUID"), firebaseUID)
-                ).stream()
+                )
                 .map(userMapper::toDTO)
-                .collect(Collectors.toList());
+                .orElseThrow(() -> new NoSuchElementException("User not found with firebaseUID: " + firebaseUID));
     }
 
     public List<UserDto> filterUsers(String postingId) {

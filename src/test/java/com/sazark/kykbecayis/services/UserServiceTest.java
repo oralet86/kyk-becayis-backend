@@ -17,14 +17,12 @@ class UserServiceTest {
     private UserRepository userRepository;
     private UserMapper userMapper;
     private UserService userService;
-    private FirebaseService firebaseService;
 
     @BeforeEach
     void setup() {
         userRepository = mock(UserRepository.class);
         userMapper = mock(UserMapper.class);
-        firebaseService = mock(FirebaseService.class);
-        userService = new UserService(userRepository, userMapper, firebaseService);
+        userService = new UserService(userRepository, userMapper);
     }
 
     @Test
@@ -33,8 +31,6 @@ class UserServiceTest {
         User user = new User();
         User savedUser = new User();
         UserDto outputDto = UserDto.builder().id(1L).firstname("John").email("test@test.edu.tr").build();
-
-        doNothing().when(firebaseService).validateUID("123");
 
         when(userMapper.toEntity(inputDto)).thenReturn(user);
         when(userRepository.save(user)).thenReturn(savedUser);
