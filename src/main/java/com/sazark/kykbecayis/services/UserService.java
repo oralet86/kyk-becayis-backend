@@ -2,11 +2,13 @@ package com.sazark.kykbecayis.services;
 
 import com.google.firebase.auth.FirebaseAuthException;
 import com.sazark.kykbecayis.domain.dto.UserDto;
+import com.sazark.kykbecayis.domain.entities.Posting;
 import com.sazark.kykbecayis.domain.entities.User;
 import com.sazark.kykbecayis.exception.InvalidEmailException;
 import com.sazark.kykbecayis.exception.InvalidUIDException;
 import com.sazark.kykbecayis.mappers.impl.UserMapper;
 import com.sazark.kykbecayis.repositories.UserRepository;
+import jakarta.persistence.criteria.Join;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -72,7 +74,7 @@ public class UserService {
         return true;
     }
 
-    public List<UserDto> filterUsers(String firebaseUID) {
+    public List<UserDto> getByFirebaseUID(String firebaseUID) {
         if (firebaseUID == null || firebaseUID.isEmpty()) {
             throw new IllegalArgumentException("firebaseUID must not be null or empty");
         }
@@ -83,4 +85,26 @@ public class UserService {
                 .map(userMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
+    public List<UserDto> filterUsers(String postingId) {
+        if (postingId == null || postingId.isEmpty()) {
+            throw new IllegalArgumentException("postingId must not be null or empty");
+        }
+
+        return userRepository.findAll((root, query, cb) -> {
+                    // Join User -> Posting
+                    Join<User, Posting> postings = root.join("postings");
+                    // Filter where posting.id = postingId (converted to Long)
+                    Long postingIdLong;
+                    try {
+                        postingIdLong = Long.valueOf(postingId);
+                    } catch (NumberFormatException e) {
+                        throw new IllegalArgumentException("postingId must be a valid number");
+                    }
+                    return cb.equal(postings.get("id"), postingIdLong);
+                }).stream()
+                .map(userMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
 }

@@ -32,11 +32,18 @@ public class UserController {
         return (user != null) ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/filter")
-    public ResponseEntity<List<UserDto>> filterUsers(
+    @GetMapping("/auth")
+    public ResponseEntity<List<UserDto>> getUserByFirebaseUID(
             @RequestParam(required = false) String firebaseUID
     ) {
-        return ResponseEntity.ok(userService.filterUsers(firebaseUID));
+        return ResponseEntity.ok(userService.getByFirebaseUID(firebaseUID));
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<List<UserDto>> filterUsers(
+            @RequestParam(required = false) String postingId
+    ) {
+        return ResponseEntity.ok(userService.filterUsers(postingId));
     }
 
     @PutMapping("/{id}")
