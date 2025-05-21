@@ -1,11 +1,14 @@
 package com.sazark.kykbecayis.importer;
 
+import com.sazark.kykbecayis.config.TestSecurityConfig;
 import com.sazark.kykbecayis.domain.dto.json.DormJsonDto;
 import com.sazark.kykbecayis.domain.entities.Dorm;
 import com.sazark.kykbecayis.repositories.DormRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.io.InputStream;
 import java.lang.reflect.Method;
@@ -14,6 +17,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
+@Import(TestSecurityConfig.class)
+@ActiveProfiles("test")
 public class DormImportServiceTest {
 
     @Autowired

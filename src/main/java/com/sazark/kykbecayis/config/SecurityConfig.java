@@ -1,27 +1,35 @@
 package com.sazark.kykbecayis.config;
 
-import com.sazark.kykbecayis.firebase.FirebaseAuthFilter;
-import com.sazark.kykbecayis.repositories.UserRepository;
-import jakarta.servlet.http.HttpServletResponse;
+import com.sazark.kykbecayis.filters.AllowAllFilter;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.List;
 
+@Configuration
 @EnableWebSecurity
+@Profile("!test")
 public class SecurityConfig {
 
+    private final AllowAllFilter allowAllFilter;
+
+    public SecurityConfig(AllowAllFilter allowAllFilter) {
+        this.allowAllFilter = allowAllFilter;
+    }
+
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, UserRepository userRepository) throws Exception {
-        FirebaseAuthFilter firebaseAuthFilter = new FirebaseAuthFilter(userRepository);
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(request -> {
-                    var corsConfig = new org.springframework.web.cors.CorsConfiguration();
+                    var corsConfig = new CorsConfiguration();
                     corsConfig.setAllowedOrigins(List.of(
                                     "https://becayisbul.com",
                                     "http://localhost:8080"
@@ -31,16 +39,19 @@ public class SecurityConfig {
                     corsConfig.setAllowCredentials(true);
                     return corsConfig;
                 }))
+                // Disable csrf
                 .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-                .httpBasic(AbstractHttpConfigurer::disable)
-                //.addFilterBefore(firebaseAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint((request, response, authException) ->
-                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
-                        )
-                );
+
+                // Permit all requests for now
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll()
+                )
+
+                // Add filter that allows all requests
+                .addFilterBefore(allowAllFilter, BasicAuthenticationFilter.class)
+
+                // Stateless session, needed for JWT
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
     }

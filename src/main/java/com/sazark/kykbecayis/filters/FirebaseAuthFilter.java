@@ -1,4 +1,4 @@
-package com.sazark.kykbecayis.firebase;
+package com.sazark.kykbecayis.filters;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
