@@ -2,8 +2,8 @@ package com.sazark.kykbecayis.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sazark.kykbecayis.config.TestSecurityConfig;
-import com.sazark.kykbecayis.domain.dto.PostingDto;
-import com.sazark.kykbecayis.services.PostingService;
+import com.sazark.kykbecayis.misc.dto.PostingDto;
+import com.sazark.kykbecayis.posting.PostingService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;

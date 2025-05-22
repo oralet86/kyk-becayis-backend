@@ -1,8 +1,10 @@
 package com.sazark.kykbecayis.importer;
 
-import com.sazark.kykbecayis.domain.dto.json.DormJsonDto;
-import com.sazark.kykbecayis.domain.entities.Dorm;
-import com.sazark.kykbecayis.repositories.DormRepository;
+import com.sazark.kykbecayis.dorm.DormJsonDto;
+import com.sazark.kykbecayis.dorm.Dorm;
+import com.sazark.kykbecayis.dorm.importer.DormImportService;
+import com.sazark.kykbecayis.dorm.importer.DormJsonReader;
+import com.sazark.kykbecayis.dorm.DormRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

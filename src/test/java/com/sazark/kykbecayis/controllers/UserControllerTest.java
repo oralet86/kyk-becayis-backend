@@ -2,8 +2,8 @@ package com.sazark.kykbecayis.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sazark.kykbecayis.config.TestSecurityConfig;
-import com.sazark.kykbecayis.domain.dto.UserDto;
-import com.sazark.kykbecayis.services.UserService;
+import com.sazark.kykbecayis.misc.dto.UserDto;
+import com.sazark.kykbecayis.user.UserService;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

@@ -1,6 +1,6 @@
 package com.sazark.kykbecayis.filters;
 
-import com.sazark.kykbecayis.services.JwtService;
+import com.sazark.kykbecayis.auth.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

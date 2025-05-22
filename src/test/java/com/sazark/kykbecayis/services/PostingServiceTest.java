@@ -1,12 +1,13 @@
 package com.sazark.kykbecayis.services;
 
-import com.sazark.kykbecayis.domain.dto.PostingDto;
-import com.sazark.kykbecayis.domain.entities.Dorm;
-import com.sazark.kykbecayis.domain.entities.Posting;
-import com.sazark.kykbecayis.domain.entities.User;
-import com.sazark.kykbecayis.mappers.impl.PostingMapper;
-import com.sazark.kykbecayis.repositories.DormRepository;
-import com.sazark.kykbecayis.repositories.PostingRepository;
+import com.sazark.kykbecayis.misc.dto.PostingDto;
+import com.sazark.kykbecayis.dorm.Dorm;
+import com.sazark.kykbecayis.posting.Posting;
+import com.sazark.kykbecayis.posting.PostingService;
+import com.sazark.kykbecayis.user.User;
+import com.sazark.kykbecayis.misc.mapper.PostingMapper;
+import com.sazark.kykbecayis.dorm.DormRepository;
+import com.sazark.kykbecayis.posting.PostingRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

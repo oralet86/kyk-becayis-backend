@@ -1,9 +1,10 @@
 package com.sazark.kykbecayis.services;
 
-import com.sazark.kykbecayis.domain.dto.OfferDto;
-import com.sazark.kykbecayis.domain.entities.Offer;
-import com.sazark.kykbecayis.mappers.impl.OfferMapper;
-import com.sazark.kykbecayis.repositories.OfferRepository;
+import com.sazark.kykbecayis.misc.dto.OfferDto;
+import com.sazark.kykbecayis.offer.Offer;
+import com.sazark.kykbecayis.misc.mapper.OfferMapper;
+import com.sazark.kykbecayis.offer.OfferRepository;
+import com.sazark.kykbecayis.offer.OfferService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -2,9 +2,9 @@ package com.sazark.kykbecayis.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sazark.kykbecayis.config.TestSecurityConfig;
-import com.sazark.kykbecayis.domain.dto.BlockDto;
-import com.sazark.kykbecayis.domain.entities.enums.GenderType;
-import com.sazark.kykbecayis.services.BlockService;
+import com.sazark.kykbecayis.misc.dto.BlockDto;
+import com.sazark.kykbecayis.misc.enums.GenderType;
+import com.sazark.kykbecayis.block.BlockService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;

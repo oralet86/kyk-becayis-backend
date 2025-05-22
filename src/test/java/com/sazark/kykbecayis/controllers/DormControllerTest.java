@@ -2,9 +2,9 @@ package com.sazark.kykbecayis.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sazark.kykbecayis.config.TestSecurityConfig;
-import com.sazark.kykbecayis.domain.dto.DormDto;
-import com.sazark.kykbecayis.domain.entities.enums.GenderType;
-import com.sazark.kykbecayis.services.DormService;
+import com.sazark.kykbecayis.misc.dto.DormDto;
+import com.sazark.kykbecayis.misc.enums.GenderType;
+import com.sazark.kykbecayis.dorm.DormService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

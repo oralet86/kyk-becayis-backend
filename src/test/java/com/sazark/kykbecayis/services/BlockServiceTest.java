@@ -1,10 +1,11 @@
 package com.sazark.kykbecayis.services;
 
-import com.sazark.kykbecayis.domain.dto.BlockDto;
-import com.sazark.kykbecayis.domain.entities.Block;
-import com.sazark.kykbecayis.domain.entities.enums.GenderType;
-import com.sazark.kykbecayis.mappers.impl.BlockMapper;
-import com.sazark.kykbecayis.repositories.BlockRepository;
+import com.sazark.kykbecayis.misc.dto.BlockDto;
+import com.sazark.kykbecayis.block.BlockService;
+import com.sazark.kykbecayis.block.Block;
+import com.sazark.kykbecayis.misc.enums.GenderType;
+import com.sazark.kykbecayis.misc.mapper.BlockMapper;
+import com.sazark.kykbecayis.block.BlockRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

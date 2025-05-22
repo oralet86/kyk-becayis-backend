@@ -1,5 +1,6 @@
 package com.sazark.kykbecayis.services;
 
+import com.sazark.kykbecayis.auth.JwtService;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

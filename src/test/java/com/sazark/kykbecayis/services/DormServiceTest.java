@@ -1,10 +1,11 @@
 package com.sazark.kykbecayis.services;
 
-import com.sazark.kykbecayis.domain.dto.DormDto;
-import com.sazark.kykbecayis.domain.entities.Dorm;
-import com.sazark.kykbecayis.domain.entities.enums.GenderType;
-import com.sazark.kykbecayis.mappers.impl.DormMapper;
-import com.sazark.kykbecayis.repositories.DormRepository;
+import com.sazark.kykbecayis.misc.dto.DormDto;
+import com.sazark.kykbecayis.dorm.Dorm;
+import com.sazark.kykbecayis.misc.enums.GenderType;
+import com.sazark.kykbecayis.misc.mapper.DormMapper;
+import com.sazark.kykbecayis.dorm.DormRepository;
+import com.sazark.kykbecayis.dorm.DormService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

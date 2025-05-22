@@ -1,9 +1,10 @@
 package com.sazark.kykbecayis.services;
 
-import com.sazark.kykbecayis.domain.dto.UserDto;
-import com.sazark.kykbecayis.domain.entities.User;
-import com.sazark.kykbecayis.mappers.impl.UserMapper;
-import com.sazark.kykbecayis.repositories.UserRepository;
+import com.sazark.kykbecayis.user.UserService;
+import com.sazark.kykbecayis.misc.dto.UserDto;
+import com.sazark.kykbecayis.user.User;
+import com.sazark.kykbecayis.misc.mapper.UserMapper;
+import com.sazark.kykbecayis.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +27,7 @@ class UserServiceTest {
     }
 
     @Test
-    void createUser_savesAndReturnsDto() throws Exception {
+    void createUser_savesAndReturnsDto() {
         UserDto inputDto = UserDto.builder().firstname("John").email("test@test.edu.tr").firebaseUID("123").build();
         User user = new User();
         User savedUser = new User();
