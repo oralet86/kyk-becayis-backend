@@ -77,24 +77,23 @@ public class UserService {
     }
 
     public List<UserDto> filterUsers(String postingId) {
-        if (postingId == null || postingId.isEmpty()) {
-            throw new IllegalArgumentException("postingId must not be null or empty");
+        if (postingId == null || postingId.isBlank()) {
+            throw new IllegalArgumentException("postingId is required");
+        }
+
+        long postingIdLong;
+        try {
+            postingIdLong = Long.parseLong(postingId);
+        } catch (NumberFormatException e) {
+            // Could also return empty list instead of exception if preferred
+            throw new IllegalArgumentException("postingId must be a valid numeric ID");
         }
 
         return userRepository.findAll((root, query, cb) -> {
-                    // Join User -> Posting
                     Join<User, Posting> postings = root.join("postings");
-                    // Filter where posting.id = postingId (converted to Long)
-                    Long postingIdLong;
-                    try {
-                        postingIdLong = Long.valueOf(postingId);
-                    } catch (NumberFormatException e) {
-                        throw new IllegalArgumentException("postingId must be a valid number");
-                    }
                     return cb.equal(postings.get("id"), postingIdLong);
                 }).stream()
                 .map(userMapper::toDTO)
                 .collect(Collectors.toList());
     }
-
 }
