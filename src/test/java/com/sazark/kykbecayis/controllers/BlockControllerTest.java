@@ -8,11 +8,12 @@ import com.sazark.kykbecayis.services.BlockService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -23,8 +24,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@SpringBootTest
+@AutoConfigureMockMvc
 @Import(TestSecurityConfig.class)
-@WebMvcTest(BlockController.class)
+@ActiveProfiles("test")
 class BlockControllerTest {
 
     @Autowired
@@ -33,16 +36,8 @@ class BlockControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Autowired
+    @MockitoBean
     private BlockService blockService;
-
-    @TestConfiguration
-    static class BlockControllerTestContextConfiguration {
-        @Bean
-        public BlockService blockService() {
-            return Mockito.mock(BlockService.class);
-        }
-    }
 
     private BlockDto getSampleDto() {
         return BlockDto.builder()
