@@ -26,10 +26,12 @@ public class UserDto {
     private String email;
     @NotBlank
     private String phone;
-    @NotNull
-    private Gender gender;
     @NotBlank
     private String city;
+    @NotNull
+    private Gender gender;
+    @NotNull
+    private Boolean isAdmin;
 
     private Long currentDormId;
     private List<Long> postingIds;

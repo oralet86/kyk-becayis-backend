@@ -34,8 +34,9 @@ public class UserMapper implements Mapper<User, UserDto> {
                 .surname(user.getSurname())
                 .email(user.getEmail())
                 .phone(user.getPhone())
-                .gender(user.getGender())
                 .city(user.getCity())
+                .gender(user.getGender())
+                .isAdmin(user.isAdmin())
                 .currentDormId(user.getCurrentDorm() != null
                         ? user.getCurrentDorm().getId()
                         : null)
@@ -43,7 +44,6 @@ public class UserMapper implements Mapper<User, UserDto> {
                         ? user.getPostings().stream().map(Posting::getId).toList()
                         : new ArrayList<>())
                 .build();
-
     }
 
     @Override

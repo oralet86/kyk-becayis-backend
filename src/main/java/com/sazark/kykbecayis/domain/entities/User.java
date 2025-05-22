@@ -1,12 +1,18 @@
 package com.sazark.kykbecayis.domain.entities;
 
 import com.sazark.kykbecayis.domain.entities.enums.Gender;
+import com.sazark.kykbecayis.domain.entities.enums.Role;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import shaded_package.javax.validation.constraints.NotBlank;
 import shaded_package.javax.validation.constraints.NotNull;
 
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -31,6 +37,7 @@ public class User {
     @Column(nullable = false)
     private String surname;
 
+    @Email
     @NotBlank
     @Column(nullable = false)
     private String email;
@@ -48,10 +55,31 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
+    @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "role", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Set<Role> roles = new HashSet<>();
+
+    @Column(nullable = false, updatable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    @CreationTimestamp
+    private Date createdAt;
+
+    @Column(nullable = false)
+    private boolean isVerified = false;
+
+    @Column(nullable = false)
+    private boolean isBanned = false;
+
     @ManyToOne
     @JoinColumn(name = "current_dorm_id")
     private Dorm currentDorm;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Posting> postings;
+
+    public boolean isAdmin() {
+        return roles.contains(Role.ADMIN);
+    }
 }
