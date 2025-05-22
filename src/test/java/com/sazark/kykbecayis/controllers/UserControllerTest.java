@@ -2,7 +2,7 @@ package com.sazark.kykbecayis.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sazark.kykbecayis.config.TestSecurityConfig;
-import com.sazark.kykbecayis.misc.dto.UserDto;
+import com.sazark.kykbecayis.misc.dto.impl.UserBaseDto;
 import com.sazark.kykbecayis.user.UserService;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -44,7 +44,7 @@ class UserControllerTest {
 
         @Test
         void shouldReturnFilteredUsers() throws Exception {
-            UserDto user = UserDto.builder().id(1L).build();
+            UserBaseDto user = UserBaseDto.builder().id(1L).build();
             Mockito.when(userService.filterUsers("post1")).thenReturn(List.of(user));
 
             mockMvc.perform(get("/api/users/filter").param("postingId", "post1"))
@@ -67,7 +67,7 @@ class UserControllerTest {
 
         @Test
         void shouldReturnUserIfExists() throws Exception {
-            UserDto user = UserDto.builder().id(10L).build();
+            UserBaseDto user = UserBaseDto.builder().id(10L).build();
             Mockito.when(userService.findById(10L)).thenReturn(user);
 
             mockMvc.perform(get("/api/users/{id}", 10))
@@ -89,7 +89,7 @@ class UserControllerTest {
 
         @Test
         void shouldReturnListOfUsers() throws Exception {
-            UserDto user = UserDto.builder().id(1L).build();
+            UserBaseDto user = UserBaseDto.builder().id(1L).build();
             Mockito.when(userService.findAll()).thenReturn(List.of(user));
 
             mockMvc.perform(get("/api/users"))
@@ -111,8 +111,8 @@ class UserControllerTest {
 
         @Test
         void shouldUpdateUserSuccessfully() throws Exception {
-            UserDto input = UserDto.builder().id(2L).build();
-            Mockito.when(userService.update(eq(2L), any(UserDto.class))).thenReturn(input);
+            UserBaseDto input = UserBaseDto.builder().id(2L).build();
+            Mockito.when(userService.update(eq(2L), any(UserBaseDto.class))).thenReturn(input);
 
             mockMvc.perform(put("/api/users/{id}", 2)
                             .contentType(MediaType.APPLICATION_JSON)
@@ -123,8 +123,8 @@ class UserControllerTest {
 
         @Test
         void shouldReturn404IfUpdateFails() throws Exception {
-            UserDto input = UserDto.builder().id(999L).build();
-            Mockito.when(userService.update(eq(999L), any(UserDto.class))).thenReturn(null);
+            UserBaseDto input = UserBaseDto.builder().id(999L).build();
+            Mockito.when(userService.update(eq(999L), any(UserBaseDto.class))).thenReturn(null);
 
             mockMvc.perform(put("/api/users/{id}", 999)
                             .contentType(MediaType.APPLICATION_JSON)

@@ -1,7 +1,7 @@
 package com.sazark.kykbecayis.services;
 
 import com.sazark.kykbecayis.user.UserService;
-import com.sazark.kykbecayis.misc.dto.UserDto;
+import com.sazark.kykbecayis.misc.dto.impl.UserBaseDto;
 import com.sazark.kykbecayis.user.User;
 import com.sazark.kykbecayis.misc.mapper.UserMapper;
 import com.sazark.kykbecayis.user.UserRepository;
@@ -28,16 +28,16 @@ class UserServiceTest {
 
     @Test
     void createUser_savesAndReturnsDto() {
-        UserDto inputDto = UserDto.builder().firstname("John").email("test@test.edu.tr").firebaseUID("123").build();
+        UserBaseDto inputDto = UserBaseDto.builder().firstname("John").email("test@test.edu.tr").firebaseUID("123").build();
         User user = new User();
         User savedUser = new User();
-        UserDto outputDto = UserDto.builder().id(1L).firstname("John").email("test@test.edu.tr").build();
+        UserBaseDto outputDto = UserBaseDto.builder().id(1L).firstname("John").email("test@test.edu.tr").build();
 
         when(userMapper.toEntity(inputDto)).thenReturn(user);
         when(userRepository.save(user)).thenReturn(savedUser);
         when(userMapper.toDTO(savedUser)).thenReturn(outputDto);
 
-        UserDto result = userService.create(inputDto);
+        UserBaseDto result = userService.create(inputDto);
 
         assertNotNull(result);
         assertEquals("John", result.getFirstname());
@@ -47,9 +47,9 @@ class UserServiceTest {
     void findById_returnsMappedDto() {
         User user = new User();
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(userMapper.toDTO(user)).thenReturn(UserDto.builder().id(1L).build());
+        when(userMapper.toDTO(user)).thenReturn(UserBaseDto.builder().id(1L).build());
 
-        UserDto result = userService.findById(1L);
+        UserBaseDto result = userService.findById(1L);
 
         assertNotNull(result);
         assertEquals(1L, result.getId());

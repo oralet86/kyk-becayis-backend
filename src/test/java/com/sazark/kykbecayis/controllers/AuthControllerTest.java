@@ -3,12 +3,13 @@ package com.sazark.kykbecayis.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.ErrorCode;
 import com.google.firebase.auth.FirebaseAuthException;
-import com.sazark.kykbecayis.auth.AuthController;
 import com.sazark.kykbecayis.config.TestSecurityConfig;
-import com.sazark.kykbecayis.misc.dto.UserDto;
-import com.sazark.kykbecayis.misc.dto.UserCreationRequest;
+import com.sazark.kykbecayis.misc.dto.FirebaseIdTokenDto;
+import com.sazark.kykbecayis.misc.dto.impl.UserBaseDto;
+import com.sazark.kykbecayis.misc.dto.impl.UserRegisterDto;
 import com.sazark.kykbecayis.auth.FirebaseService;
 import com.sazark.kykbecayis.auth.JwtService;
+import com.sazark.kykbecayis.misc.enums.Gender;
 import com.sazark.kykbecayis.user.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,30 +52,32 @@ public class AuthControllerTest {
     private final String UID = "firebase_uid";
     private final String JWT = "jwt_token";
 
-    private UserDto userDto;
+    private UserBaseDto userBaseDto;
 
     @BeforeEach
     public void setup() {
-        userDto = new UserDto();
-        userDto.setId(1L);
-        userDto.setFirebaseUID(UID);
-        userDto.setEmail("test@example.com");
+        userBaseDto = new UserBaseDto();
+        userBaseDto.setId(1L);
+        userBaseDto.setFirebaseUID(UID);
+        userBaseDto.setEmail("test@example.com");
     }
 
     @Test
     public void login_withValidToken_returnsJwt() throws Exception {
         when(firebaseService.verifyIdTokenAndGetUID(VALID_FIREBASE_TOKEN)).thenReturn(UID);
-        when(userService.getByFirebaseUID(UID)).thenReturn(userDto);
+        when(userService.getByFirebaseUID(UID)).thenReturn(userBaseDto);
         when(jwtService.generateToken(UID)).thenReturn(JWT);
 
-        AuthController.FirebaseLoginRequest loginRequest = new AuthController.FirebaseLoginRequest(VALID_FIREBASE_TOKEN);
+        FirebaseIdTokenDto loginRequest = new FirebaseIdTokenDto();
+        loginRequest.setFirebaseIdToken(VALID_FIREBASE_TOKEN);
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").value(JWT));
+                .andExpect(jsonPath("$.jsonWebToken").value(JWT));
     }
+
 
     @Test
     public void login_withInvalidToken_returnsUnauthorized() throws Exception {
@@ -85,7 +88,7 @@ public class AuthControllerTest {
                 null,
                 null));
 
-        AuthController.FirebaseLoginRequest loginRequest = new AuthController.FirebaseLoginRequest(INVALID_FIREBASE_TOKEN);
+        FirebaseIdTokenDto loginRequest = new FirebaseIdTokenDto(INVALID_FIREBASE_TOKEN);
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -95,7 +98,7 @@ public class AuthControllerTest {
 
     @Test
     public void login_withMissingToken_returnsBadRequest() throws Exception {
-        AuthController.FirebaseLoginRequest loginRequest = new AuthController.FirebaseLoginRequest("");
+        FirebaseIdTokenDto loginRequest = new FirebaseIdTokenDto("");
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -106,12 +109,17 @@ public class AuthControllerTest {
     @Test
     public void register_withValidToken_returnsCreated() throws Exception {
         when(firebaseService.verifyIdTokenAndGetUID(VALID_FIREBASE_TOKEN)).thenReturn(UID);
-        when(userService.create(any(UserDto.class))).thenReturn(userDto);
+        when(userService.create(any(UserBaseDto.class))).thenReturn(userBaseDto);
 
-        userDto.setFirebaseUID(null);  // simulate not being set
-        UserCreationRequest request = new UserCreationRequest();
+        UserRegisterDto request = new UserRegisterDto();
         request.setFirebaseIdToken(VALID_FIREBASE_TOKEN);
-        request.setUserDto(userDto);
+        request.setFirstname("Test");
+        request.setSurname("User");
+        request.setEmail("test@uni.edu.tr");
+        request.setPhone("1234567890");
+        request.setCity("Istanbul");
+        request.setGender(Gender.MALE);
+        request.setCurrentDormId(10L);
 
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -119,21 +127,6 @@ public class AuthControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", "/api/users/1"))
                 .andExpect(jsonPath("$.id").value(1));
-    }
-
-    @Test
-    public void register_withTokenMismatch_returnsBadRequest() throws Exception {
-        when(firebaseService.verifyIdTokenAndGetUID(VALID_FIREBASE_TOKEN)).thenReturn("other_uid");
-
-        userDto.setFirebaseUID("mismatch_uid");
-        UserCreationRequest request = new UserCreationRequest();
-        request.setFirebaseIdToken(VALID_FIREBASE_TOKEN);
-        request.setUserDto(userDto);
-
-        mockMvc.perform(post("/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -145,10 +138,16 @@ public class AuthControllerTest {
                 null,
                 null));
 
-        userDto.setFirebaseUID(null);
-        UserCreationRequest request = new UserCreationRequest();
+        UserRegisterDto request = new UserRegisterDto();
+        request.setFirebaseIdToken(VALID_FIREBASE_TOKEN);
+        request.setFirstname("Test");
+        request.setSurname("User");
+        request.setEmail("test@uni.edu.tr");
+        request.setPhone("1234567890");
+        request.setCity("Istanbul");
+        request.setGender(Gender.MALE);
+        request.setCurrentDormId(10L);
         request.setFirebaseIdToken(INVALID_FIREBASE_TOKEN);
-        request.setUserDto(userDto);
 
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)

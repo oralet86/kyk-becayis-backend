@@ -1,7 +1,7 @@
 package com.sazark.kykbecayis.misc.mapper;
 
 import com.sazark.kykbecayis.user.User;
-import com.sazark.kykbecayis.misc.dto.UserDto;
+import com.sazark.kykbecayis.misc.dto.impl.UserBaseDto;
 import com.sazark.kykbecayis.posting.Posting;
 import com.sazark.kykbecayis.misc.Mapper;
 import com.sazark.kykbecayis.dorm.DormRepository;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 
 @Component
-public class UserMapper implements Mapper<User, UserDto> {
+public class UserMapper implements Mapper<User, UserBaseDto> {
 
     private final DormRepository dormRepository;
     private final PostingRepository postingRepository;
@@ -22,12 +22,12 @@ public class UserMapper implements Mapper<User, UserDto> {
     }
 
     @Override
-    public UserDto toDTO(User user) {
+    public UserBaseDto toDTO(User user) {
         if (user == null) {
             return null;
         }
 
-        return UserDto.builder()
+        return UserBaseDto.builder()
                 .id(user.getId())
                 .firebaseUID(user.getFirebaseUID())
                 .firstname(user.getFirstname())
@@ -47,25 +47,25 @@ public class UserMapper implements Mapper<User, UserDto> {
     }
 
     @Override
-    public User toEntity(UserDto userDto) {
-        if (userDto == null) {
+    public User toEntity(UserBaseDto userBaseDto) {
+        if (userBaseDto == null) {
             return null;
         }
 
         return User.builder()
-                .id(userDto.getId())
-                .firebaseUID(userDto.getFirebaseUID())
-                .firstname(userDto.getFirstname())
-                .surname(userDto.getSurname())
-                .email(userDto.getEmail())
-                .phone(userDto.getPhone())
-                .gender(userDto.getGender())
-                .city(userDto.getCity())
-                .currentDorm(userDto.getCurrentDormId() != null
-                        ? dormRepository.findById(userDto.getCurrentDormId()).orElse(null)
+                .id(userBaseDto.getId())
+                .firebaseUID(userBaseDto.getFirebaseUID())
+                .firstname(userBaseDto.getFirstname())
+                .surname(userBaseDto.getSurname())
+                .email(userBaseDto.getEmail())
+                .phone(userBaseDto.getPhone())
+                .gender(userBaseDto.getGender())
+                .city(userBaseDto.getCity())
+                .currentDorm(userBaseDto.getCurrentDormId() != null
+                        ? dormRepository.findById(userBaseDto.getCurrentDormId()).orElse(null)
                         : null)
-                .postings(userDto.getPostingIds() != null
-                        ? postingRepository.findAllById(userDto.getPostingIds())
+                .postings(userBaseDto.getPostingIds() != null
+                        ? postingRepository.findAllById(userBaseDto.getPostingIds())
                         : new ArrayList<>())
                 .build();
     }

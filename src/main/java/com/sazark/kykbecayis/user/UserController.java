@@ -1,6 +1,6 @@
 package com.sazark.kykbecayis.user;
 
-import com.sazark.kykbecayis.misc.dto.UserDto;
+import com.sazark.kykbecayis.misc.dto.impl.UserBaseDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import shaded_package.javax.validation.Valid;
@@ -17,27 +17,27 @@ public class UserController {
     }
 
     @GetMapping("/filter")
-    public ResponseEntity<List<UserDto>> filterUsers(
+    public ResponseEntity<List<UserBaseDto>> filterUsers(
             @RequestParam(required = false) String postingId
     ) {
         return ResponseEntity.ok(userService.filterUsers(postingId));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserDto> getUser(@PathVariable Long id) {
-        UserDto user = userService.findById(id);
+    public ResponseEntity<UserBaseDto> getUser(@PathVariable Long id) {
+        UserBaseDto user = userService.findById(id);
         return (user != null) ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
     }
 
     @GetMapping
-    public ResponseEntity<List<UserDto>> getUsers() {
-        List<UserDto> users = userService.findAll();
+    public ResponseEntity<List<UserBaseDto>> getUsers() {
+        List<UserBaseDto> users = userService.findAll();
         return (users != null) ? ResponseEntity.ok(users) : ResponseEntity.notFound().build();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @Valid @RequestBody UserDto userDto) {
-        UserDto updated = userService.update(id, userDto);
+    public ResponseEntity<UserBaseDto> updateUser(@PathVariable Long id, @Valid @RequestBody UserBaseDto userBaseDto) {
+        UserBaseDto updated = userService.update(id, userBaseDto);
         return (updated != null) ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
     }
 
