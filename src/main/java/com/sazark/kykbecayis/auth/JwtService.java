@@ -9,14 +9,14 @@ import java.util.Date;
 
 @Component
 public class JwtService {
-    private final String secret = "your-256-bit-secret-your-256-bit-secret";
+    private final String secret = "Y2VzK3N1OHF2cGpMbWxrT2tJYk9hmjFvYWR4cGh0a3U=";
     private final long expirationMs = 7*86400000; // 1 week
 
     private final Key key = Keys.hmacShaKeyFor(secret.getBytes());
 
-    public String generateToken(String username) {
+    public String generateToken(String uid) {
         return Jwts.builder()
-                .setSubject(username)
+                .setSubject(uid)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(key, SignatureAlgorithm.HS256)
