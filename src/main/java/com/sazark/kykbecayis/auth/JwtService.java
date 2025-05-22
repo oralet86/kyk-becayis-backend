@@ -9,8 +9,8 @@ import java.util.Date;
 
 @Component
 public class JwtService {
-    private final String secret = "your-256-bit-secret-your-256-bit-secret"; // Must be 32+ chars
-    private final long expirationMs = 86400000; // 24 hours
+    private final String secret = "your-256-bit-secret-your-256-bit-secret";
+    private final long expirationMs = 7*86400000; // 1 week
 
     private final Key key = Keys.hmacShaKeyFor(secret.getBytes());
 
