@@ -2,16 +2,13 @@ package com.sazark.kykbecayis;
 
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
-import com.sazark.kykbecayis.config.TestSecurityConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest()
-@Import(TestSecurityConfig.class)
 @ActiveProfiles("test")
 public class FirebaseConnectionTest {
     @Test
