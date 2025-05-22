@@ -1,15 +1,17 @@
 package com.sazark.kykbecayis.config;
 
-import com.sazark.kykbecayis.filters.AllowAllFilter;
+import com.sazark.kykbecayis.filters.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.List;
@@ -18,15 +20,11 @@ import java.util.List;
 @EnableWebSecurity
 @Profile("!test")
 public class SecurityConfig {
-
-    private final AllowAllFilter allowAllFilter;
-
-    public SecurityConfig(AllowAllFilter allowAllFilter) {
-        this.allowAllFilter = allowAllFilter;
+    public SecurityConfig() {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(request -> {
                     var corsConfig = new CorsConfiguration();
@@ -44,15 +42,25 @@ public class SecurityConfig {
 
                 // Permit all requests for now
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()
+                        .requestMatchers("/api/dorms/**", "/api/blocks/**").permitAll()
+                        .anyRequest().authenticated()
                 )
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .permitAll())
 
-                // Add filter that allows all requests
-                .addFilterBefore(allowAllFilter, BasicAuthenticationFilter.class)
+                .logout(logout -> logout.permitAll())
 
                 // Stateless session, needed for JWT
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
     }
 }
