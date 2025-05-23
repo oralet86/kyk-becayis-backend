@@ -1,31 +1,60 @@
 package com.sazark.kykbecayis.misc.mapper;
 
+import com.sazark.kykbecayis.misc.dto.user.UserNotAuthDto;
+import com.sazark.kykbecayis.misc.dto.user.UserRegisterDto;
 import com.sazark.kykbecayis.user.User;
-import com.sazark.kykbecayis.misc.dto.impl.UserBaseDto;
+import com.sazark.kykbecayis.misc.dto.user.UserBaseDto;
 import com.sazark.kykbecayis.posting.Posting;
-import com.sazark.kykbecayis.misc.Mapper;
 import com.sazark.kykbecayis.dorm.DormRepository;
-import com.sazark.kykbecayis.posting.PostingRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 
 @Component
-public class UserMapper implements Mapper<User, UserBaseDto> {
+public class UserMapper {
 
     private final DormRepository dormRepository;
-    private final PostingRepository postingRepository;
 
-    public UserMapper(DormRepository dormRepository, PostingRepository postingRepository) {
+    public UserMapper(DormRepository dormRepository) {
         this.dormRepository = dormRepository;
-        this.postingRepository = postingRepository;
     }
 
-    @Override
+    public User toEntity(UserBaseDto dto) {
+        if (dto == null) return null;
+
+        return User.builder()
+                .id(dto.getId())
+                .firebaseUID(dto.getFirebaseUID())
+                .firstname(dto.getFirstname())
+                .surname(dto.getSurname())
+                .email(dto.getEmail())
+                .phone(dto.getPhone())
+                .gender(dto.getGender())
+                .city(dto.getCity())
+                .currentDorm(dto.getCurrentDormId() != null
+                        ? dormRepository.findById(dto.getCurrentDormId()).orElse(null)
+                        : null)
+                .build();
+    }
+
+    public User toEntity(UserRegisterDto dto) {
+        if (dto == null) return null;
+
+        return User.builder()
+                .firstname(dto.getFirstname())
+                .surname(dto.getSurname())
+                .email(dto.getEmail())
+                .phone(dto.getPhone())
+                .city(dto.getCity())
+                .gender(dto.getGender())
+                .currentDorm(dto.getCurrentDormId() != null
+                        ? dormRepository.findById(dto.getCurrentDormId()).orElse(null)
+                        : null)
+                .build();
+    }
+
     public UserBaseDto toDTO(User user) {
-        if (user == null) {
-            return null;
-        }
+        if (user == null) return null;
 
         return UserBaseDto.builder()
                 .id(user.getId())
@@ -46,26 +75,19 @@ public class UserMapper implements Mapper<User, UserBaseDto> {
                 .build();
     }
 
-    @Override
-    public User toEntity(UserBaseDto userBaseDto) {
-        if (userBaseDto == null) {
-            return null;
-        }
+    public UserNotAuthDto toNotAuthDTO(User user) {
+        if (user == null) return null;
 
-        return User.builder()
-                .id(userBaseDto.getId())
-                .firebaseUID(userBaseDto.getFirebaseUID())
-                .firstname(userBaseDto.getFirstname())
-                .surname(userBaseDto.getSurname())
-                .email(userBaseDto.getEmail())
-                .phone(userBaseDto.getPhone())
-                .gender(userBaseDto.getGender())
-                .city(userBaseDto.getCity())
-                .currentDorm(userBaseDto.getCurrentDormId() != null
-                        ? dormRepository.findById(userBaseDto.getCurrentDormId()).orElse(null)
+        return UserNotAuthDto.builder()
+                .firstname(user.getFirstname())
+                .surname(user.getSurname())
+                .city(user.getCity())
+                .gender(user.getGender())
+                .currentDormId(user.getCurrentDorm() != null
+                        ? user.getCurrentDorm().getId()
                         : null)
-                .postings(userBaseDto.getPostingIds() != null
-                        ? postingRepository.findAllById(userBaseDto.getPostingIds())
+                .postingIds(user.getPostings() != null
+                        ? user.getPostings().stream().map(Posting::getId).toList()
                         : new ArrayList<>())
                 .build();
     }

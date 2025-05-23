@@ -1,4 +1,4 @@
-package com.sazark.kykbecayis.misc.dto.impl;
+package com.sazark.kykbecayis.misc.dto.user;
 
 import com.sazark.kykbecayis.misc.enums.Gender;
 import lombok.AllArgsConstructor;

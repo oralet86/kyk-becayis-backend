@@ -1,7 +1,7 @@
 package com.sazark.kykbecayis.services;
 
 import com.sazark.kykbecayis.user.UserService;
-import com.sazark.kykbecayis.misc.dto.impl.UserBaseDto;
+import com.sazark.kykbecayis.misc.dto.user.UserBaseDto;
 import com.sazark.kykbecayis.user.User;
 import com.sazark.kykbecayis.misc.mapper.UserMapper;
 import com.sazark.kykbecayis.user.UserRepository;

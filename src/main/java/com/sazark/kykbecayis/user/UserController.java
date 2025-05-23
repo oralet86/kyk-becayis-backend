@@ -1,6 +1,6 @@
 package com.sazark.kykbecayis.user;
 
-import com.sazark.kykbecayis.misc.dto.impl.UserBaseDto;
+import com.sazark.kykbecayis.misc.dto.user.UserBaseDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import shaded_package.javax.validation.Valid;
