@@ -3,20 +3,22 @@ package com.sazark.kykbecayis.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.ErrorCode;
 import com.google.firebase.auth.FirebaseAuthException;
-import com.sazark.kykbecayis.config.TestSecurityConfig;
-import com.sazark.kykbecayis.misc.dto.FirebaseIdTokenDto;
-import com.sazark.kykbecayis.misc.dto.impl.UserBaseDto;
-import com.sazark.kykbecayis.misc.dto.impl.UserRegisterDto;
 import com.sazark.kykbecayis.auth.FirebaseService;
 import com.sazark.kykbecayis.auth.JwtService;
+import com.sazark.kykbecayis.config.TestSecurityConfig;
+import com.sazark.kykbecayis.misc.dto.FirebaseIdTokenDto;
+import com.sazark.kykbecayis.misc.dto.user.UserBaseDto;
+import com.sazark.kykbecayis.misc.dto.user.UserRegisterDto;
 import com.sazark.kykbecayis.misc.enums.Gender;
 import com.sazark.kykbecayis.user.UserService;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -25,6 +27,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -63,7 +66,7 @@ public class AuthControllerTest {
     }
 
     @Test
-    public void login_withValidToken_returnsJwt() throws Exception {
+    public void login_withValidToken_setsCookie() throws Exception {
         when(firebaseService.verifyIdTokenAndGetUID(VALID_FIREBASE_TOKEN)).thenReturn(UID);
         when(userService.getByFirebaseUID(UID)).thenReturn(userBaseDto);
         when(jwtService.generateToken(UID)).thenReturn(JWT);
@@ -75,9 +78,9 @@ public class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.jsonWebToken").value(JWT));
+                .andExpect(header().string(HttpHeaders.SET_COOKIE, org.hamcrest.Matchers.containsString("jwt=" + JWT)))
+                .andExpect(header().string(HttpHeaders.SET_COOKIE, org.hamcrest.Matchers.containsString("HttpOnly")));
     }
-
 
     @Test
     public void login_withInvalidToken_returnsUnauthorized() throws Exception {
@@ -107,9 +110,10 @@ public class AuthControllerTest {
     }
 
     @Test
-    public void register_withValidToken_returnsCreated() throws Exception {
+    public void register_withValidToken_setsCookieAndReturnsCreated() throws Exception {
         when(firebaseService.verifyIdTokenAndGetUID(VALID_FIREBASE_TOKEN)).thenReturn(UID);
         when(userService.create(any(UserBaseDto.class))).thenReturn(userBaseDto);
+        when(jwtService.generateToken(UID)).thenReturn(JWT);
 
         UserRegisterDto request = new UserRegisterDto();
         request.setFirebaseIdToken(VALID_FIREBASE_TOKEN);
@@ -126,7 +130,9 @@ public class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", "/api/users/1"))
-                .andExpect(jsonPath("$.id").value(1));
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(header().string(HttpHeaders.SET_COOKIE, org.hamcrest.Matchers.containsString("jwt=" + JWT)))
+                .andExpect(header().string(HttpHeaders.SET_COOKIE, org.hamcrest.Matchers.containsString("HttpOnly")));
     }
 
     @Test
@@ -139,7 +145,7 @@ public class AuthControllerTest {
                 null));
 
         UserRegisterDto request = new UserRegisterDto();
-        request.setFirebaseIdToken(VALID_FIREBASE_TOKEN);
+        request.setFirebaseIdToken(INVALID_FIREBASE_TOKEN);
         request.setFirstname("Test");
         request.setSurname("User");
         request.setEmail("test@uni.edu.tr");
@@ -147,11 +153,29 @@ public class AuthControllerTest {
         request.setCity("Istanbul");
         request.setGender(Gender.MALE);
         request.setCurrentDormId(10L);
-        request.setFirebaseIdToken(INVALID_FIREBASE_TOKEN);
 
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void logout_shouldClearJwtCookie() throws Exception {
+        mockMvc.perform(post("/auth/logout"))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.SET_COOKIE, org.hamcrest.Matchers.containsString("jwt=;")))
+                .andExpect(header().string(HttpHeaders.SET_COOKIE, org.hamcrest.Matchers.containsString("Max-Age=0")))
+                .andExpect(header().string(HttpHeaders.SET_COOKIE, org.hamcrest.Matchers.containsString("HttpOnly")));
+    }
+
+    @Test
+    public void expiredJwtToken_shouldBeRejected() throws Exception {
+        // Mock an expired token
+        when(jwtService.isTokenValid(JWT)).thenReturn(false);
+
+        mockMvc.perform(get("/admin")
+                        .cookie(new Cookie("jwt", JWT)))
                 .andExpect(status().isUnauthorized());
     }
 }

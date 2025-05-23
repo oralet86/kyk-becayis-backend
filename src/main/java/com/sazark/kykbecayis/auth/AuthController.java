@@ -3,11 +3,13 @@ package com.sazark.kykbecayis.auth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.sazark.kykbecayis.exception.InvalidEmailException;
 import com.sazark.kykbecayis.misc.dto.FirebaseIdTokenDto;
-import com.sazark.kykbecayis.misc.dto.JwtDto;
-import com.sazark.kykbecayis.misc.dto.impl.UserBaseDto;
-import com.sazark.kykbecayis.misc.dto.impl.UserRegisterDto;
+import com.sazark.kykbecayis.misc.dto.user.UserBaseDto;
+import com.sazark.kykbecayis.misc.dto.user.UserRegisterDto;
 import com.sazark.kykbecayis.user.UserService;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,7 +34,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody FirebaseIdTokenDto request) {
+    public ResponseEntity<?> login(@RequestBody FirebaseIdTokenDto request, HttpServletResponse response) {
         String firebaseIdToken = request.getFirebaseIdToken();
         if (firebaseIdToken == null || firebaseIdToken.isEmpty()) {
             return ResponseEntity.badRequest().body("Firebase token is missing");
@@ -51,24 +53,36 @@ public class AuthController {
             // 3. Generate JWT
             String jwt = jwtService.generateToken(uid);
 
-            // 4. Return JWT
-            return ResponseEntity.ok(new JwtDto(jwt));
+            // 4. Set JWT as HttpOnly cookie
+            ResponseCookie cookie = ResponseCookie.from("jwt", jwt)
+                    .httpOnly(true)
+                    .secure(true)
+                    .path("/")
+                    .maxAge(3600) // 1 hour
+                    .sameSite("Strict")
+                    .build();
+
+            response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+            // 5. Respond with 200 OK
+            return ResponseEntity.ok("Login successful");
 
         } catch (FirebaseAuthException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Firebase token");
         }
     }
 
+
     @PostMapping("/register")
-    public ResponseEntity<UserBaseDto> register(@Valid @RequestBody UserRegisterDto request) {
+    public ResponseEntity<UserBaseDto> register(@Valid @RequestBody UserRegisterDto request, HttpServletResponse response) {
         if (!request.getEmail().toLowerCase().trim().endsWith(".edu.tr")) {
             throw new InvalidEmailException("Email must end with '.edu.tr' to be eligible.");
         }
         try {
-            // Verify Firebase ID token and get UID
+            // 1. Verify Firebase ID token and get UID
             String uid = firebaseService.verifyIdTokenAndGetUID(request.getFirebaseIdToken());
 
-            // Create a UserBaseDto to use in UserService
+            // 2. Create a UserBaseDto to use in UserService
             UserBaseDto user = new UserBaseDto();
             user.setFirstname(request.getFirstname());
             user.setSurname(request.getSurname());
@@ -79,15 +93,46 @@ public class AuthController {
             user.setCurrentDormId(request.getCurrentDormId());
             user.setFirebaseUID(uid);
 
-            // Create user in your system
+            // 3. Create user in your system
             UserBaseDto savedUser = userService.create(user);
 
-            // Return 201 Created with location header
+            // 4. Generate JWT
+            String jwt = jwtService.generateToken(uid);
+
+            // 5. Set JWT as HttpOnly cookie
+            ResponseCookie cookie = ResponseCookie.from("jwt", jwt)
+                    .httpOnly(true)
+                    .secure(true)
+                    .path("/")
+                    .maxAge(JwtService.JWT_LIFESPAN_SECOND)
+                    .sameSite("Strict")
+                    .build();
+
+            response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+            // 6. Return 201 Created with location header
             URI location = URI.create("/api/users/" + savedUser.getId());
             return ResponseEntity.created(location).body(savedUser);
 
         } catch (FirebaseAuthException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+    }
+
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        // Clear the cookie by setting Max-Age=0
+        ResponseCookie cookie = ResponseCookie.from("jwt", "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Strict")
+                .build();
+
+        response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        return ResponseEntity.ok("Logged out");
     }
 }

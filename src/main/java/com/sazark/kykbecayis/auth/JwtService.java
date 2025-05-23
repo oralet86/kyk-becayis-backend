@@ -7,14 +7,17 @@ import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.util.Date;
 
+
 @Component
 public class JwtService {
+    public static final int JWT_LIFESPAN_SECOND = (7*24*60*60); // 1 week
     private final String secret = "Y2VzK3N1OHF2cGpMbWxrT2tJYk9hmjFvYWR4cGh0a3U=";
-    private final long expirationMs = 7*86400000; // 1 week
 
     private final Key key = Keys.hmacShaKeyFor(secret.getBytes());
 
     public String generateToken(String uid) {
+        // 1 week in ms
+        long expirationMs = JWT_LIFESPAN_SECOND * 1000; // 1 week in ms
         return Jwts.builder()
                 .setSubject(uid)
                 .setIssuedAt(new Date())

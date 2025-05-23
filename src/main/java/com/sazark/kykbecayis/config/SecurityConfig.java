@@ -44,6 +44,7 @@ public class SecurityConfig {
                 // Permit all requests for now
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/dorms/**", "/api/blocks/**").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().permitAll()
                 )
                 .formLogin(form -> form
@@ -58,7 +59,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
