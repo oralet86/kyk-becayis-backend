@@ -78,7 +78,7 @@ public class User {
     @JoinColumn(name = "current_dorm_id")
     private Dorm currentDorm;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Posting> postings;
 
     public boolean isAdmin() {
