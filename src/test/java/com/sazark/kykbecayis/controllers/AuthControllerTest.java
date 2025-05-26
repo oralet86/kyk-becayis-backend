@@ -161,6 +161,47 @@ public class AuthControllerTest {
     }
 
     @Test
+    public void me_withValidJwt_returnsUserInfo() throws Exception {
+        when(jwtService.isTokenValid(JWT)).thenReturn(true);
+        when(jwtService.extractUID(JWT)).thenReturn(UID);
+        when(userService.getByFirebaseUID(UID)).thenReturn(userBaseDto);
+
+        mockMvc.perform(get("/api/auth/me")
+                        .cookie(new Cookie("jwt", JWT)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value(userBaseDto.getEmail()))
+                .andExpect(jsonPath("$.firebaseUID").value(userBaseDto.getFirebaseUID()));
+    }
+
+    @Test
+    public void me_withoutJwt_returnsUnauthorized() throws Exception {
+        mockMvc.perform(get("/api/auth/me"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().string("Not logged in"));
+    }
+
+    @Test
+    public void me_withInvalidJwt_returnsUnauthorized() throws Exception {
+        when(jwtService.isTokenValid(JWT)).thenReturn(false);
+
+        mockMvc.perform(get("/api/auth/me")
+                        .cookie(new Cookie("jwt", JWT)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void me_withValidJwt_butUserNotFound_returnsUnauthorized() throws Exception {
+        when(jwtService.isTokenValid(JWT)).thenReturn(true);
+        when(jwtService.extractUID(JWT)).thenReturn(UID);
+        when(userService.getByFirebaseUID(UID)).thenReturn(null);
+
+        mockMvc.perform(get("/api/auth/me")
+                        .cookie(new Cookie("jwt", JWT)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().string("User not found"));
+    }
+
+    @Test
     public void logout_shouldClearJwtCookie() throws Exception {
         mockMvc.perform(post("/api/auth/logout"))
                 .andExpect(status().isOk())

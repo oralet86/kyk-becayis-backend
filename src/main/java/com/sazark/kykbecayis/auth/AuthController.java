@@ -11,10 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import shaded_package.javax.validation.Valid;
 
 import java.net.URI;
@@ -59,7 +56,7 @@ public class AuthController {
                     .httpOnly(true)
                     .secure(true)
                     .path("/")
-                    .maxAge(3600) // 1 hour
+                    .maxAge(JwtService.JWT_LIFESPAN_SECOND)
                     .sameSite("Strict")
                     .build();
 
@@ -121,6 +118,28 @@ public class AuthController {
         }
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser(@CookieValue(name = "jwt", required = false) String jwt) {
+        if (jwt == null || jwt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not logged in");
+        }
+
+        if (!jwtService.isTokenValid(jwt)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
+        }
+
+        String firebaseUID = jwtService.extractUID(jwt);
+        if (firebaseUID == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unable to extract UID");
+        }
+
+        UserBaseDto user = userService.getByFirebaseUID(firebaseUID);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+        }
+
+        return ResponseEntity.ok(user);
+    }
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
