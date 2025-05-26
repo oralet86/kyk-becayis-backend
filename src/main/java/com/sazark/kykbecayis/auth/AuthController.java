@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import shaded_package.javax.validation.Valid;
 
 import java.net.URI;
+import java.util.HashSet;
 
 @RestController
 @RequestMapping("/auth")
@@ -92,6 +93,7 @@ public class AuthController {
             user.setGender(request.getGender());
             user.setCurrentDormId(request.getCurrentDormId());
             user.setFirebaseUID(uid);
+            user.setRoles(new HashSet<>());
 
             // 3. Create user in your system
             UserBaseDto savedUser = userService.create(user);

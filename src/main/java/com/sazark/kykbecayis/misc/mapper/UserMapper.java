@@ -31,6 +31,7 @@ public class UserMapper {
                 .phone(dto.getPhone())
                 .gender(dto.getGender())
                 .city(dto.getCity())
+                .roles(dto.getRoles())
                 .currentDorm(dto.getCurrentDormId() != null
                         ? dormRepository.findById(dto.getCurrentDormId()).orElse(null)
                         : null)
@@ -65,6 +66,7 @@ public class UserMapper {
                 .phone(user.getPhone())
                 .city(user.getCity())
                 .gender(user.getGender())
+                .roles(user.getRoles())
                 .isAdmin(user.isAdmin())
                 .currentDormId(user.getCurrentDorm() != null
                         ? user.getCurrentDorm().getId()
