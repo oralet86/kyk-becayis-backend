@@ -74,7 +74,7 @@ public class AuthControllerTest {
         FirebaseIdTokenDto loginRequest = new FirebaseIdTokenDto();
         loginRequest.setFirebaseIdToken(VALID_FIREBASE_TOKEN);
 
-        mockMvc.perform(post("/auth/login")
+        mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
@@ -93,7 +93,7 @@ public class AuthControllerTest {
 
         FirebaseIdTokenDto loginRequest = new FirebaseIdTokenDto(INVALID_FIREBASE_TOKEN);
 
-        mockMvc.perform(post("/auth/login")
+        mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized());
@@ -103,7 +103,7 @@ public class AuthControllerTest {
     public void login_withMissingToken_returnsBadRequest() throws Exception {
         FirebaseIdTokenDto loginRequest = new FirebaseIdTokenDto("");
 
-        mockMvc.perform(post("/auth/login")
+        mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isBadRequest());
@@ -125,7 +125,7 @@ public class AuthControllerTest {
         request.setGender(Gender.MALE);
         request.setCurrentDormId(10L);
 
-        mockMvc.perform(post("/auth/register")
+        mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -154,7 +154,7 @@ public class AuthControllerTest {
         request.setGender(Gender.MALE);
         request.setCurrentDormId(10L);
 
-        mockMvc.perform(post("/auth/register")
+        mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized());
@@ -162,7 +162,7 @@ public class AuthControllerTest {
 
     @Test
     public void logout_shouldClearJwtCookie() throws Exception {
-        mockMvc.perform(post("/auth/logout"))
+        mockMvc.perform(post("/api/auth/logout"))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.SET_COOKIE, org.hamcrest.Matchers.containsString("jwt=;")))
                 .andExpect(header().string(HttpHeaders.SET_COOKIE, org.hamcrest.Matchers.containsString("Max-Age=0")))

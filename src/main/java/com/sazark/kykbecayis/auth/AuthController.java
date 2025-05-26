@@ -21,7 +21,7 @@ import java.net.URI;
 import java.util.HashSet;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class AuthController {
 
     private final FirebaseService firebaseService;
