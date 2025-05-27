@@ -31,8 +31,9 @@ public class SecurityConfig {
                     var corsConfig = new CorsConfiguration();
                     corsConfig.setAllowedOrigins(List.of(
                                     "https://becayisbul.com",
-                                    "http://localhost:8080"
-                    ));
+                                    "http://localhost:8080",
+                                    "http://localhost:3000"
+                            ));
                     corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                     corsConfig.setAllowedHeaders(List.of("*"));
                     corsConfig.setAllowCredentials(true);
