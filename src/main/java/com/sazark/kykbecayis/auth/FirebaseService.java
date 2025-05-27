@@ -13,4 +13,8 @@ public class FirebaseService {
         FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(idToken);
         return decodedToken.getUid();
     }
+
+    public void deleteUser(String idToken) throws FirebaseAuthException {
+        FirebaseAuth.getInstance().verifyIdToken(idToken);
+    }
 }

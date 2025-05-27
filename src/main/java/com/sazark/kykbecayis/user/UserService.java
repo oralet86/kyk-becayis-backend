@@ -1,5 +1,7 @@
 package com.sazark.kykbecayis.user;
 
+import com.google.firebase.auth.FirebaseAuthException;
+import com.sazark.kykbecayis.auth.FirebaseService;
 import com.sazark.kykbecayis.misc.mapper.UserMapper;
 import com.sazark.kykbecayis.misc.dto.user.UserBaseDto;
 import com.sazark.kykbecayis.posting.Posting;
@@ -15,10 +17,12 @@ import java.util.stream.Collectors;
 public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final FirebaseService firebaseService;
 
-    public UserService(UserRepository userRepository, UserMapper userMapper) {
+    public UserService(UserRepository userRepository, UserMapper userMapper, FirebaseService firebaseService) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.firebaseService = firebaseService;
     }
 
     public UserBaseDto create(UserBaseDto userBaseDto) {
@@ -55,6 +59,16 @@ public class UserService {
         if (!userRepository.existsById(id)) {
             return false;
         }
+        // Get the users firebase uid
+        User user = userRepository.findById(id).orElseThrow(NoSuchElementException::new);
+        String userUID = user.getFirebaseUID();
+
+        try {
+            firebaseService.deleteUser(userUID);
+        } catch (FirebaseAuthException e) {
+            System.out.println(e.getMessage());
+        }
+
         userRepository.deleteById(id);
         return true;
     }

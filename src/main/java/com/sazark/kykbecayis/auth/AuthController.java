@@ -143,7 +143,7 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
-        // Clear the cookie by setting Max-Age=0
+        // Clear the cookie
         ResponseCookie cookie = ResponseCookie.from("jwt", "")
                 .httpOnly(true)
                 .secure(true)
@@ -155,5 +155,13 @@ public class AuthController {
         response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         return ResponseEntity.ok("Logged out");
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+        boolean deleted = userService.delete(id);
+        return deleted
+                ? ResponseEntity.status(HttpStatus.NO_CONTENT).body("User successfully deleted")
+                : ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
     }
 }

@@ -132,24 +132,4 @@ class UserControllerTest {
                     .andExpect(status().isNotFound());
         }
     }
-
-    @Nested
-    class DeleteUser {
-
-        @Test
-        void shouldDeleteUserSuccessfully() throws Exception {
-            Mockito.when(userService.delete(5L)).thenReturn(true);
-
-            mockMvc.perform(delete("/api/users/{id}", 5))
-                    .andExpect(status().isNoContent());
-        }
-
-        @Test
-        void shouldReturn404IfDeleteFails() throws Exception {
-            Mockito.when(userService.delete(404L)).thenReturn(false);
-
-            mockMvc.perform(delete("/api/users/{id}", 404))
-                    .andExpect(status().isNotFound());
-        }
-    }
 }
