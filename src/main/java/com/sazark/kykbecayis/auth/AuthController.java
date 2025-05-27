@@ -54,7 +54,7 @@ public class AuthController {
             // 4. Set JWT as HttpOnly cookie
             ResponseCookie cookie = ResponseCookie.from("jwt", jwt)
                     .httpOnly(true)
-                    .secure(true)
+                    .secure(false)
                     .path("/")
                     .maxAge(JwtService.JWT_LIFESPAN_SECOND)
                     .sameSite("Strict")

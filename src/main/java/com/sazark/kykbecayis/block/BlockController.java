@@ -29,5 +29,4 @@ public class BlockController {
 
         return ResponseEntity.ok(blockService.findAll());
     }
-
 }
