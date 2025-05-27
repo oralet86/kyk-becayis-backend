@@ -95,20 +95,6 @@ public class AuthController {
             // 3. Create user in your system
             UserBaseDto savedUser = userService.create(user);
 
-            // 4. Generate JWT
-            String jwt = jwtService.generateToken(uid);
-
-            // 5. Set JWT as HttpOnly cookie
-            ResponseCookie cookie = ResponseCookie.from("jwt", jwt)
-                    .httpOnly(true)
-                    .secure(true)
-                    .path("/")
-                    .maxAge(JwtService.JWT_LIFESPAN_SECOND)
-                    .sameSite("Strict")
-                    .build();
-
-            response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-
             // 6. Return 201 Created with location header
             URI location = URI.create("/api/users/" + savedUser.getId());
             return ResponseEntity.created(location).body(savedUser);

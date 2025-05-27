@@ -112,10 +112,9 @@ public class AuthControllerTest {
     }
 
     @Test
-    public void register_withValidToken_setsCookieAndReturnsCreated() throws Exception {
+    public void register_withValidToken_returnsCreated() throws Exception {
         when(firebaseService.verifyIdTokenAndGetUID(VALID_FIREBASE_TOKEN)).thenReturn(UID);
         when(userService.create(any(UserBaseDto.class))).thenReturn(userBaseDto);
-        when(jwtService.generateToken(UID)).thenReturn(JWT);
 
         UserRegisterDto request = new UserRegisterDto();
         request.setFirebaseIdToken(VALID_FIREBASE_TOKEN);
@@ -132,10 +131,9 @@ public class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", "/api/users/1"))
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(header().string(HttpHeaders.SET_COOKIE, org.hamcrest.Matchers.containsString("jwt=" + JWT)))
-                .andExpect(header().string(HttpHeaders.SET_COOKIE, org.hamcrest.Matchers.containsString("HttpOnly")));
+                .andExpect(jsonPath("$.id").value(1));
     }
+
 
     @Test
     public void register_withInvalidToken_returnsUnauthorized() throws Exception {
