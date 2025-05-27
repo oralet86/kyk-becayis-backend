@@ -19,6 +19,6 @@ springdoc:
     path: /api/v3/api-docs
 logging:
   pattern:
-    console: %d{yyyy-MM-dd HH:mm:ss} - %logger{36} - %msg%n
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %logger{36} - %msg%n"
   level:
     root: INFO
