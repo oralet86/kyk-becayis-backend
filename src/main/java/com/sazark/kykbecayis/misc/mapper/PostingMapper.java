@@ -9,7 +9,6 @@ import com.sazark.kykbecayis.dorm.DormRepository;
 import com.sazark.kykbecayis.user.UserRepository;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 
 @Component
@@ -49,7 +48,6 @@ public class PostingMapper implements Mapper<Posting, PostingDto> {
         return Posting.builder()
                 .id(dto.getId())
                 .isValid(dto.getIsValid())
-                .date(LocalDate.parse(dto.getDate())) // Parse String to LocalDate
                 .user(user)
                 .sourceDorm(sourceDorm)
                 .targetDorms(dto.getTargetDormIds() != null

@@ -25,7 +25,7 @@ public class Posting {
     private Boolean isValid;
 
     @NotNull
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDate date;
 
     @ManyToOne

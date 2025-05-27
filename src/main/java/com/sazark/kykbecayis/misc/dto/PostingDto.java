@@ -16,7 +16,6 @@ import java.util.List;
 public class PostingDto {
     private Long id;
 
-    @NotNull
     private String date;
 
     @NotBlank
