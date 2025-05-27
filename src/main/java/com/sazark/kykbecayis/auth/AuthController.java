@@ -1,7 +1,6 @@
 package com.sazark.kykbecayis.auth;
 
 import com.google.firebase.auth.FirebaseAuthException;
-import com.sazark.kykbecayis.exception.InvalidEmailException;
 import com.sazark.kykbecayis.misc.dto.FirebaseIdTokenDto;
 import com.sazark.kykbecayis.misc.dto.user.UserBaseDto;
 import com.sazark.kykbecayis.misc.dto.user.UserRegisterDto;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import shaded_package.javax.validation.Valid;
 
 import java.net.URI;
-import java.util.HashSet;
 
 @RestController
 @RequestMapping("/api/auth")

@@ -58,7 +58,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             firebaseUid = jwtService.extractUID(token);
         }
 
-
         // Authenticate if not already done
         if (firebaseUid != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserBaseDto user = userService.getByFirebaseUID(firebaseUid);
