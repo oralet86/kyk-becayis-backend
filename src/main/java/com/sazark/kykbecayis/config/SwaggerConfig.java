@@ -13,7 +13,7 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         Server httpsServer = new Server();
-        httpsServer.setUrl("https://becayisbul.com/api");
+        httpsServer.setUrl("https://becayisbul.com");
 
         return new OpenAPI().servers(List.of(httpsServer));
     }
