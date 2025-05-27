@@ -49,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/logout", "/api/auth/me").authenticated()
                         .requestMatchers("/api/users/**").authenticated()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .anyRequest().permitAll()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
