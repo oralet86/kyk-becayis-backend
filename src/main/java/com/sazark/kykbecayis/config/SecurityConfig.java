@@ -42,11 +42,13 @@ public class SecurityConfig {
                 // Disable csrf
                 .csrf(AbstractHttpConfigurer::disable)
 
-                // Permit all requests for now
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/dorms/**", "/api/blocks/**").permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .anyRequest().permitAll()
+                        .requestMatchers("/api/**").permitAll()
+                        .requestMatchers("/api/dorms/**", "/api/blocks/**", "/api/postings/**").permitAll()
+                        .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
+                        .requestMatchers("/api/auth/logout", "/api/auth/me").authenticated()
+                        .requestMatchers("/api/users/**").authenticated()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
