@@ -5,7 +5,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/offers")
@@ -17,23 +16,31 @@ public class OfferController {
         this.offerService = offerService;
     }
 
+    @GetMapping
+    public ResponseEntity<?> getOffers(
+            @RequestParam(required = false) Long id,
+            @RequestParam(required = false) Long posting,
+            @RequestParam(required = false) Long senderId,
+            @RequestParam(required = false) String senderUid
+    ) {
+        if (id != null) {
+            OfferDto offer = offerService.findById(id);
+            return (offer != null) ? ResponseEntity.ok(offer) : ResponseEntity.notFound().build();
+        }
+
+        if (posting != null || senderId != null || senderUid != null) {
+            return ResponseEntity.ok(offerService.filterOffers(posting, senderId, senderUid));
+        }
+
+        return ResponseEntity.ok(offerService.findAll());
+    }
+
     @PostMapping
     public ResponseEntity<OfferDto> createOffer(@RequestBody OfferDto offerDto) {
         OfferDto savedOffer = offerService.create(offerDto);
         return ResponseEntity
                 .created(URI.create("/api/offers/" + savedOffer.getId()))
                 .body(savedOffer);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<OfferDto> getOfferById(@PathVariable Long id) {
-        OfferDto offerDto = offerService.findById(id);
-        return (offerDto != null) ? ResponseEntity.ok(offerDto) : ResponseEntity.notFound().build();
-    }
-
-    @GetMapping
-    public ResponseEntity<List<OfferDto>> getAllOffers() {
-        return ResponseEntity.ok(offerService.findAll());
     }
 
     @PutMapping("/{id}")
