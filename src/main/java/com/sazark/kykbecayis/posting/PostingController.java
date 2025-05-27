@@ -1,6 +1,7 @@
 package com.sazark.kykbecayis.posting;
 
 import com.sazark.kykbecayis.misc.dto.PostingDto;
+import com.sazark.kykbecayis.misc.request.PostingCreateRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,8 +17,8 @@ public class PostingController {
     }
 
     @PostMapping
-    public ResponseEntity<PostingDto> createPosting(@RequestBody PostingDto postingDto) {
-        PostingDto savedPosting = postingService.create(postingDto);
+    public ResponseEntity<PostingDto> createPosting(@RequestBody PostingCreateRequest postingCreateRequest) {
+        PostingDto savedPosting = postingService.create(postingCreateRequest);
         return ResponseEntity
                 .created(URI.create("/api/postings/" + savedPosting.getId()))
                 .body(savedPosting);

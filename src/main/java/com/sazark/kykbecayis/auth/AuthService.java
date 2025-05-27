@@ -3,7 +3,7 @@ package com.sazark.kykbecayis.auth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.sazark.kykbecayis.exception.InvalidEmailException;
 import com.sazark.kykbecayis.misc.dto.user.UserBaseDto;
-import com.sazark.kykbecayis.misc.dto.user.UserRegisterDto;
+import com.sazark.kykbecayis.misc.request.UserCreateRequest;
 import com.sazark.kykbecayis.user.UserService;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +19,7 @@ public class AuthService {
         this.userService = userService;
     }
 
-    public UserBaseDto registerUser(UserRegisterDto request) throws FirebaseAuthException {
+    public UserBaseDto registerUser(UserCreateRequest request) throws FirebaseAuthException {
         String email = request.getEmail();
         if (email == null || !email.toLowerCase().trim().endsWith(".edu.tr")) {
             throw new InvalidEmailException("Email must end with '.edu.tr'");

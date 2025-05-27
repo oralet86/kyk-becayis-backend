@@ -2,6 +2,7 @@ package com.sazark.kykbecayis.offer;
 
 import com.sazark.kykbecayis.misc.dto.OfferDto;
 import com.sazark.kykbecayis.misc.mapper.OfferMapper;
+import com.sazark.kykbecayis.misc.request.OfferCreateRequest;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.stereotype.Service;
 
@@ -18,8 +19,8 @@ public class OfferService {
         this.offerMapper = offerMapper;
     }
 
-    public OfferDto create(OfferDto offerDto) {
-        Offer offer = offerMapper.toEntity(offerDto);
+    public OfferDto create(OfferCreateRequest offerCreateRequest) {
+        Offer offer = offerMapper.toEntity(offerCreateRequest);
         Offer savedOffer = offerRepository.save(offer);
         return offerMapper.toDTO(savedOffer);
     }

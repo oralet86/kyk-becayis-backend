@@ -49,5 +49,8 @@ public class Posting {
         if (date == null) {
             date = LocalDate.now();
         }
+        if (isValid == null) {
+            isValid = true;
+        }
     }
 }

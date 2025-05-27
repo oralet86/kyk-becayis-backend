@@ -1,10 +1,10 @@
 package com.sazark.kykbecayis.misc.mapper;
 
 import com.sazark.kykbecayis.dorm.Dorm;
+import com.sazark.kykbecayis.misc.request.PostingCreateRequest;
 import com.sazark.kykbecayis.posting.Posting;
 import com.sazark.kykbecayis.misc.dto.PostingDto;
 import com.sazark.kykbecayis.user.User;
-import com.sazark.kykbecayis.misc.Mapper;
 import com.sazark.kykbecayis.dorm.DormRepository;
 import com.sazark.kykbecayis.user.UserRepository;
 import org.springframework.stereotype.Component;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 
 @Component
-public class PostingMapper implements Mapper<Posting, PostingDto> {
+public class PostingMapper {
 
     private final DormRepository dormRepository;
     private final UserRepository userRepository;
@@ -22,7 +22,6 @@ public class PostingMapper implements Mapper<Posting, PostingDto> {
         this.userRepository = userRepository;
     }
 
-    @Override
     public PostingDto toDTO(Posting posting) {
         if (posting == null) return null;
 
@@ -38,7 +37,6 @@ public class PostingMapper implements Mapper<Posting, PostingDto> {
                 .build();
     }
 
-    @Override
     public Posting toEntity(PostingDto dto) {
         if (dto == null) return null;
 
@@ -52,6 +50,21 @@ public class PostingMapper implements Mapper<Posting, PostingDto> {
                 .sourceDorm(sourceDorm)
                 .targetDorms(dto.getTargetDormIds() != null
                         ? dormRepository.findAllById(dto.getTargetDormIds())
+                        : new ArrayList<>())
+                .build();
+    }
+
+    public Posting toEntity(PostingCreateRequest request) {
+        if (request == null) return null;
+
+        User user = userRepository.findById(request.getUserId()).orElse(null);
+        Dorm sourceDorm = dormRepository.findById(request.getSourceDormId()).orElse(null);
+
+        return Posting.builder()
+                .user(user)
+                .sourceDorm(sourceDorm)
+                .targetDorms(request.getTargetDormIds() != null
+                        ? dormRepository.findAllById(request.getTargetDormIds())
                         : new ArrayList<>())
                 .build();
     }

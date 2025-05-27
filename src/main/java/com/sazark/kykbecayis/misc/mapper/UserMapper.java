@@ -1,7 +1,7 @@
 package com.sazark.kykbecayis.misc.mapper;
 
 import com.sazark.kykbecayis.misc.dto.user.UserNotAuthDto;
-import com.sazark.kykbecayis.misc.dto.user.UserRegisterDto;
+import com.sazark.kykbecayis.misc.request.UserCreateRequest;
 import com.sazark.kykbecayis.user.User;
 import com.sazark.kykbecayis.misc.dto.user.UserBaseDto;
 import com.sazark.kykbecayis.posting.Posting;
@@ -38,7 +38,7 @@ public class UserMapper {
                 .build();
     }
 
-    public User toEntity(UserRegisterDto dto) {
+    public User toEntity(UserCreateRequest dto) {
         if (dto == null) return null;
 
         return User.builder()

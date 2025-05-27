@@ -3,7 +3,7 @@ package com.sazark.kykbecayis.auth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.sazark.kykbecayis.misc.dto.FirebaseIdTokenDto;
 import com.sazark.kykbecayis.misc.dto.user.UserBaseDto;
-import com.sazark.kykbecayis.misc.dto.user.UserRegisterDto;
+import com.sazark.kykbecayis.misc.request.UserCreateRequest;
 import com.sazark.kykbecayis.user.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
@@ -71,7 +71,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserBaseDto> register(@Valid @RequestBody UserRegisterDto request) throws FirebaseAuthException {
+    public ResponseEntity<UserBaseDto> register(@Valid @RequestBody UserCreateRequest request) throws FirebaseAuthException {
         UserBaseDto savedUser = authService.registerUser(request);
         URI location = URI.create("/api/users/" + savedUser.getId());
         return ResponseEntity.created(location).body(savedUser);

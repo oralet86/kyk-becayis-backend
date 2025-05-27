@@ -1,6 +1,7 @@
 package com.sazark.kykbecayis.services;
 
 import com.sazark.kykbecayis.misc.dto.OfferDto;
+import com.sazark.kykbecayis.misc.request.OfferCreateRequest;
 import com.sazark.kykbecayis.offer.Offer;
 import com.sazark.kykbecayis.misc.mapper.OfferMapper;
 import com.sazark.kykbecayis.offer.OfferRepository;
@@ -29,20 +30,40 @@ class OfferServiceTest {
 
     @Test
     void createOffer_savesAndReturnsDto() {
-        OfferDto inputDto = OfferDto.builder().postingId(1L).senderId(2L).build();
-        Offer offer = new Offer();
-        Offer savedOffer = new Offer();
-        OfferDto outputDto = OfferDto.builder().id(1L).postingId(1L).senderId(2L).created(LocalDateTime.now()).build();
+        OfferCreateRequest request = OfferCreateRequest.builder()
+                .postingId(1L)
+                .senderId(2L)
+                .build();
 
-        when(offerMapper.toEntity(inputDto)).thenReturn(offer);
+        // Mocked entity and result objects
+        Offer offer = new Offer(); // The offer to be saved
+        Offer savedOffer = new Offer(); // What the repository returns after saving
+        savedOffer.setId(1L);
+        savedOffer.setCreated(LocalDateTime.now());
+
+        OfferDto outputDto = OfferDto.builder()
+                .id(1L)
+                .postingId(1L)
+                .senderId(2L)
+                .created(savedOffer.getCreated())
+                .build();
+
+        // Act: mock behavior
+        when(offerMapper.toEntity(request)).thenReturn(offer);
         when(offerRepository.save(offer)).thenReturn(savedOffer);
         when(offerMapper.toDTO(savedOffer)).thenReturn(outputDto);
 
-        OfferDto result = offerService.create(inputDto);
+        // Call the service
+        OfferDto result = offerService.create(request);
 
+        // Assert
         assertNotNull(result);
         assertEquals(1L, result.getId());
+        assertEquals(1L, result.getPostingId());
+        assertEquals(2L, result.getSenderId());
+        assertNotNull(result.getCreated());
     }
+
 
     @Test
     void findById_returnsMappedDto() {

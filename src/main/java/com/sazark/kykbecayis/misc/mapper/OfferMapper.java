@@ -1,16 +1,16 @@
 package com.sazark.kykbecayis.misc.mapper;
 
+import com.sazark.kykbecayis.misc.request.OfferCreateRequest;
 import com.sazark.kykbecayis.offer.Offer;
 import com.sazark.kykbecayis.misc.dto.OfferDto;
 import com.sazark.kykbecayis.posting.Posting;
 import com.sazark.kykbecayis.user.User;
-import com.sazark.kykbecayis.misc.Mapper;
 import com.sazark.kykbecayis.posting.PostingRepository;
 import com.sazark.kykbecayis.user.UserRepository;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OfferMapper implements Mapper<Offer, OfferDto> {
+public class OfferMapper {
 
     private final PostingRepository postingRepository;
     private final UserRepository userRepository;
@@ -20,7 +20,6 @@ public class OfferMapper implements Mapper<Offer, OfferDto> {
         this.userRepository = userRepository;
     }
 
-    @Override
     public OfferDto toDTO(Offer offer) {
         if (offer == null) return null;
 
@@ -33,7 +32,6 @@ public class OfferMapper implements Mapper<Offer, OfferDto> {
                 .build();
     }
 
-    @Override
     public Offer toEntity(OfferDto dto) {
         if (dto == null) return null;
 
@@ -46,6 +44,18 @@ public class OfferMapper implements Mapper<Offer, OfferDto> {
                 .sender(sender)
                 .status(dto.getStatus())
                 .created(dto.getCreated())
+                .build();
+    }
+
+    public Offer toEntity(OfferCreateRequest offerCreateRequest) {
+        if (offerCreateRequest == null) return null;
+
+        Posting posting = postingRepository.findById(offerCreateRequest.getPostingId()).orElse(null);
+        User sender = userRepository.findById(offerCreateRequest.getSenderId()).orElse(null);
+
+        return Offer.builder()
+                .posting(posting)
+                .sender(sender)
                 .build();
     }
 }

@@ -8,7 +8,7 @@ import com.sazark.kykbecayis.auth.JwtService;
 import com.sazark.kykbecayis.config.TestSecurityConfig;
 import com.sazark.kykbecayis.misc.dto.FirebaseIdTokenDto;
 import com.sazark.kykbecayis.misc.dto.user.UserBaseDto;
-import com.sazark.kykbecayis.misc.dto.user.UserRegisterDto;
+import com.sazark.kykbecayis.misc.request.UserCreateRequest;
 import com.sazark.kykbecayis.misc.enums.Gender;
 import com.sazark.kykbecayis.user.UserService;
 import jakarta.servlet.http.Cookie;
@@ -116,7 +116,7 @@ public class AuthControllerTest {
         when(firebaseService.verifyIdTokenAndGetUID(VALID_FIREBASE_TOKEN)).thenReturn(UID);
         when(userService.create(any(UserBaseDto.class))).thenReturn(userBaseDto);
 
-        UserRegisterDto request = new UserRegisterDto();
+        UserCreateRequest request = new UserCreateRequest();
         request.setFirebaseIdToken(VALID_FIREBASE_TOKEN);
         request.setFirstname("Test");
         request.setSurname("User");
@@ -144,7 +144,7 @@ public class AuthControllerTest {
                 null,
                 null));
 
-        UserRegisterDto request = new UserRegisterDto();
+        UserCreateRequest request = new UserCreateRequest();
         request.setFirebaseIdToken(INVALID_FIREBASE_TOKEN);
         request.setFirstname("Test");
         request.setSurname("User");

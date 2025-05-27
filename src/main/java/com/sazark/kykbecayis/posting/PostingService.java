@@ -2,6 +2,7 @@ package com.sazark.kykbecayis.posting;
 
 import com.sazark.kykbecayis.misc.dto.PostingDto;
 import com.sazark.kykbecayis.misc.mapper.PostingMapper;
+import com.sazark.kykbecayis.misc.request.PostingCreateRequest;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.stereotype.Service;
 
@@ -19,8 +20,8 @@ public class PostingService {
         this.postingMapper = postingMapper;
     }
 
-    public PostingDto create(PostingDto postingDto) {
-        Posting posting = postingMapper.toEntity(postingDto);
+    public PostingDto create(PostingCreateRequest postingCreateRequest) {
+        Posting posting = postingMapper.toEntity(postingCreateRequest);
         Posting savedPosting = postingRepository.save(posting);
         return postingMapper.toDTO(savedPosting);
     }

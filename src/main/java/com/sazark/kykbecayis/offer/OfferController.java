@@ -1,6 +1,7 @@
 package com.sazark.kykbecayis.offer;
 
 import com.sazark.kykbecayis.misc.dto.OfferDto;
+import com.sazark.kykbecayis.misc.request.OfferCreateRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,8 +37,8 @@ public class OfferController {
     }
 
     @PostMapping
-    public ResponseEntity<OfferDto> createOffer(@RequestBody OfferDto offerDto) {
-        OfferDto savedOffer = offerService.create(offerDto);
+    public ResponseEntity<OfferDto> createOffer(@RequestBody OfferCreateRequest offerCreateRequest) {
+        OfferDto savedOffer = offerService.create(offerCreateRequest);
         return ResponseEntity
                 .created(URI.create("/api/offers/" + savedOffer.getId()))
                 .body(savedOffer);
