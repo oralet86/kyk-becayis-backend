@@ -24,11 +24,13 @@ public class AuthController {
     private final FirebaseService firebaseService;
     private final UserService userService;
     private final JwtService jwtService;
+    private final AuthService authService;
 
-    public AuthController(FirebaseService firebaseService, UserService userService, JwtService jwtService) {
+    public AuthController(FirebaseService firebaseService, UserService userService, JwtService jwtService, AuthService authService) {
         this.firebaseService = firebaseService;
         this.userService = userService;
         this.jwtService = jwtService;
+        this.authService = authService;
     }
 
     @PostMapping("/login")
@@ -72,36 +74,10 @@ public class AuthController {
 
 
     @PostMapping("/register")
-    public ResponseEntity<UserBaseDto> register(@Valid @RequestBody UserRegisterDto request, HttpServletResponse response) {
-        if (!request.getEmail().toLowerCase().trim().endsWith(".edu.tr")) {
-            throw new InvalidEmailException("Email must end with '.edu.tr' to be eligible.");
-        }
-        try {
-            // 1. Verify Firebase ID token and get UID
-            String uid = firebaseService.verifyIdTokenAndGetUID(request.getFirebaseIdToken());
-
-            // 2. Create a UserBaseDto to use in UserService
-            UserBaseDto user = new UserBaseDto();
-            user.setFirstname(request.getFirstname());
-            user.setSurname(request.getSurname());
-            user.setEmail(request.getEmail());
-            user.setPhone(request.getPhone());
-            user.setCity(request.getCity());
-            user.setGender(request.getGender());
-            user.setCurrentDormId(request.getCurrentDormId());
-            user.setFirebaseUID(uid);
-            user.setRoles(new HashSet<>());
-
-            // 3. Create user in your system
-            UserBaseDto savedUser = userService.create(user);
-
-            // 6. Return 201 Created with location header
-            URI location = URI.create("/api/users/" + savedUser.getId());
-            return ResponseEntity.created(location).body(savedUser);
-
-        } catch (FirebaseAuthException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+    public ResponseEntity<UserBaseDto> register(@Valid @RequestBody UserRegisterDto request) throws FirebaseAuthException {
+        UserBaseDto savedUser = authService.registerUser(request);
+        URI location = URI.create("/api/users/" + savedUser.getId());
+        return ResponseEntity.created(location).body(savedUser);
     }
 
     @GetMapping("/me")
