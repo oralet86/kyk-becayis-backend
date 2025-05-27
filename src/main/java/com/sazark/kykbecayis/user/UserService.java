@@ -4,6 +4,7 @@ import com.sazark.kykbecayis.misc.mapper.UserMapper;
 import com.sazark.kykbecayis.misc.dto.user.UserBaseDto;
 import com.sazark.kykbecayis.posting.Posting;
 import jakarta.persistence.criteria.Join;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -49,6 +50,7 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public boolean delete(Long id) {
         if (!userRepository.existsById(id)) {
             return false;
