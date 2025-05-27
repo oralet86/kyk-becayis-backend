@@ -70,7 +70,6 @@ public class AuthController {
         }
     }
 
-
     @PostMapping("/register")
     public ResponseEntity<UserBaseDto> register(@Valid @RequestBody UserRegisterDto request) throws FirebaseAuthException {
         UserBaseDto savedUser = authService.registerUser(request);
