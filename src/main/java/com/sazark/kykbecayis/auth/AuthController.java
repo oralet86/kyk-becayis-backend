@@ -39,19 +39,19 @@ public class AuthController {
         }
 
         try {
-            // 1. Verify Firebase token and get UID
+            // Verify Firebase token and get UID
             String uid = firebaseService.verifyIdTokenAndGetUID(firebaseIdToken);
 
-            // 2. Look up the user in the DB
+            // Look up the user in the DB
             UserBaseDto user = userService.getByFirebaseUID(uid);
             if (user == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
             }
 
-            // 3. Generate JWT
+            // Generate JWT
             String jwt = jwtService.generateToken(uid);
 
-            // 4. Set JWT as HttpOnly cookie
+            // Set JWT as HttpOnly cookie
             ResponseCookie cookie = ResponseCookie.from("jwt", jwt)
                     .httpOnly(true)
                     .secure(false)
@@ -62,7 +62,7 @@ public class AuthController {
 
             response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-            // 5. Respond with 200 OK
+            // Respond with 200 OK
             return ResponseEntity.ok("Login successful");
 
         } catch (FirebaseAuthException e) {
