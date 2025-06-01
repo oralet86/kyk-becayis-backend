@@ -2,6 +2,7 @@ package com.sazark.kykbecayis.services;
 
 import com.sazark.kykbecayis.misc.dto.PostingDto;
 import com.sazark.kykbecayis.dorm.Dorm;
+import com.sazark.kykbecayis.misc.request.PostingCreateRequest;
 import com.sazark.kykbecayis.posting.Posting;
 import com.sazark.kykbecayis.posting.PostingService;
 import com.sazark.kykbecayis.user.User;
@@ -86,16 +87,57 @@ class PostingServiceTest {
 
     @Test
     void testCreate() {
-        when(dormRepository.findAllById(List.of(2L))).thenReturn(List.of(targetDorm));
-        when(postingRepository.save(any(Posting.class))).thenAnswer(inv -> {
-            Posting p = inv.getArgument(0);
-            p.setId(10L);
-            return p;
-        });
+        PostingCreateRequest request = PostingCreateRequest.builder()
+                .userId(1L)
+                .sourceDormId(1L)
+                .targetDormIds(List.of(2L))
+                .build();
 
-        PostingDto result = postingService.create(dto);
+        // Prepare expected Posting entity before save
+        Posting postingToSave = Posting.builder()
+                .user(user)
+                .sourceDorm(sourceDorm)
+                .targetDorms(List.of(targetDorm))
+                .isValid(true)
+                .date(LocalDate.now())
+                .build();
+
+        // Prepare saved posting (with ID)
+        Posting savedPosting = Posting.builder()
+                .id(10L)
+                .user(user)
+                .sourceDorm(sourceDorm)
+                .targetDorms(List.of(targetDorm))
+                .isValid(true)
+                .date(LocalDate.now())
+                .build();
+
+        // Prepare expected DTO result
+        PostingDto expectedDto = PostingDto.builder()
+                .id(10L)
+                .userId(1L)
+                .sourceDormId(1L)
+                .targetDormIds(List.of(2L))
+                .isValid(true)
+                .date(savedPosting.getDate().toString())
+                .build();
+
+        // Mocks
+        when(dormRepository.findAllById(List.of(2L))).thenReturn(List.of(targetDorm));
+        when(postingMapper.toEntity(request)).thenReturn(postingToSave);
+        when(postingRepository.save(postingToSave)).thenReturn(savedPosting);
+        when(postingMapper.toDTO(savedPosting)).thenReturn(expectedDto);
+
+        // Act
+        PostingDto result = postingService.create(request);
+
+        // Assert
+        assertNotNull(result);
         assertEquals(10L, result.getId());
+        assertEquals(1L, result.getUserId());
+        assertEquals(List.of(2L), result.getTargetDormIds());
     }
+
 
     @Test
     void testFindById_found() {

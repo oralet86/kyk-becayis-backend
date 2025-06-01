@@ -1,4 +1,4 @@
-package com.sazark.kykbecayis.misc.dto.user;
+package com.sazark.kykbecayis.misc.request;
 
 import com.sazark.kykbecayis.misc.enums.Gender;
 import lombok.*;
@@ -10,7 +10,7 @@ import shaded_package.javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserRegisterDto {
+public class UserCreateRequest {
     @NotBlank
     private String firebaseIdToken;
     @NotBlank

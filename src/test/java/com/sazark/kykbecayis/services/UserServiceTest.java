@@ -1,5 +1,7 @@
 package com.sazark.kykbecayis.services;
 
+import com.google.firebase.auth.FirebaseAuthException;
+import com.sazark.kykbecayis.auth.FirebaseService;
 import com.sazark.kykbecayis.user.UserService;
 import com.sazark.kykbecayis.misc.dto.user.UserBaseDto;
 import com.sazark.kykbecayis.user.User;
@@ -18,12 +20,14 @@ class UserServiceTest {
     private UserRepository userRepository;
     private UserMapper userMapper;
     private UserService userService;
+    private FirebaseService firebaseService;
 
     @BeforeEach
     void setup() {
         userRepository = mock(UserRepository.class);
         userMapper = mock(UserMapper.class);
-        userService = new UserService(userRepository, userMapper);
+        firebaseService = mock(FirebaseService.class);
+        userService = new UserService(userRepository, userMapper, firebaseService);
     }
 
     @Test
@@ -56,17 +60,31 @@ class UserServiceTest {
     }
 
     @Test
-    void delete_existingUser_returnsTrue() {
-        when(userRepository.existsById(1L)).thenReturn(true);
-        boolean result = userService.delete(1L);
+    void delete_existingUser_returnsTrue() throws Exception {
+        Long userId = 1L;
+        String firebaseUid = "firebase-uid-123";
+        User user = new User();
+        user.setId(userId);
+        user.setFirebaseUID(firebaseUid);
+
+        when(userRepository.existsById(userId)).thenReturn(true);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        boolean result = userService.delete(userId);
+
         assertTrue(result);
-        verify(userRepository).deleteById(1L);
+        verify(firebaseService).deleteUser(firebaseUid);
+        verify(userRepository).deleteById(userId);
     }
 
     @Test
-    void delete_nonexistentUser_returnsFalse() {
+    void delete_nonexistentUser_returnsFalse() throws FirebaseAuthException {
         when(userRepository.existsById(999L)).thenReturn(false);
+
         boolean result = userService.delete(999L);
+
         assertFalse(result);
+        verify(firebaseService, never()).deleteUser(any());
+        verify(userRepository, never()).deleteById(any());
     }
 }

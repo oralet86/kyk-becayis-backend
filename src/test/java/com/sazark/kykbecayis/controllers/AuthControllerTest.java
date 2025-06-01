@@ -8,12 +8,14 @@ import com.sazark.kykbecayis.auth.JwtService;
 import com.sazark.kykbecayis.config.TestSecurityConfig;
 import com.sazark.kykbecayis.misc.dto.FirebaseIdTokenDto;
 import com.sazark.kykbecayis.misc.dto.user.UserBaseDto;
-import com.sazark.kykbecayis.misc.dto.user.UserRegisterDto;
+import com.sazark.kykbecayis.misc.request.UserCreateRequest;
 import com.sazark.kykbecayis.misc.enums.Gender;
 import com.sazark.kykbecayis.user.UserService;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,8 +28,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -110,12 +112,11 @@ public class AuthControllerTest {
     }
 
     @Test
-    public void register_withValidToken_setsCookieAndReturnsCreated() throws Exception {
+    public void register_withValidToken_returnsCreated() throws Exception {
         when(firebaseService.verifyIdTokenAndGetUID(VALID_FIREBASE_TOKEN)).thenReturn(UID);
         when(userService.create(any(UserBaseDto.class))).thenReturn(userBaseDto);
-        when(jwtService.generateToken(UID)).thenReturn(JWT);
 
-        UserRegisterDto request = new UserRegisterDto();
+        UserCreateRequest request = new UserCreateRequest();
         request.setFirebaseIdToken(VALID_FIREBASE_TOKEN);
         request.setFirstname("Test");
         request.setSurname("User");
@@ -130,10 +131,9 @@ public class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", "/api/users/1"))
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(header().string(HttpHeaders.SET_COOKIE, org.hamcrest.Matchers.containsString("jwt=" + JWT)))
-                .andExpect(header().string(HttpHeaders.SET_COOKIE, org.hamcrest.Matchers.containsString("HttpOnly")));
+                .andExpect(jsonPath("$.id").value(1));
     }
+
 
     @Test
     public void register_withInvalidToken_returnsUnauthorized() throws Exception {
@@ -144,7 +144,7 @@ public class AuthControllerTest {
                 null,
                 null));
 
-        UserRegisterDto request = new UserRegisterDto();
+        UserCreateRequest request = new UserCreateRequest();
         request.setFirebaseIdToken(INVALID_FIREBASE_TOKEN);
         request.setFirstname("Test");
         request.setSurname("User");
@@ -218,5 +218,25 @@ public class AuthControllerTest {
         mockMvc.perform(get("/admin")
                         .cookie(new Cookie("jwt", JWT)))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Nested
+    class DeleteUser {
+
+        @Test
+        void shouldDeleteUserSuccessfully() throws Exception {
+            Mockito.when(userService.delete(5L)).thenReturn(true);
+
+            mockMvc.perform(delete("/api/auth/{id}", 5))
+                    .andExpect(status().isNoContent());
+        }
+
+        @Test
+        void shouldReturn404IfDeleteFails() throws Exception {
+            Mockito.when(userService.delete(404L)).thenReturn(false);
+
+            mockMvc.perform(delete("/api/auth/{id}", 404))
+                    .andExpect(status().isNotFound());
+        }
     }
 }

@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class AdminController {
-    @GetMapping("/admin")
+    @GetMapping("/api/admin")
     public ResponseEntity<String> adminPanel() {
         return ResponseEntity.ok("Welcome to the admin panel");
     }

@@ -1,10 +1,9 @@
 package com.sazark.kykbecayis.auth;
 
 import com.google.firebase.auth.FirebaseAuthException;
-import com.sazark.kykbecayis.exception.InvalidEmailException;
 import com.sazark.kykbecayis.misc.dto.FirebaseIdTokenDto;
 import com.sazark.kykbecayis.misc.dto.user.UserBaseDto;
-import com.sazark.kykbecayis.misc.dto.user.UserRegisterDto;
+import com.sazark.kykbecayis.misc.request.UserCreateRequest;
 import com.sazark.kykbecayis.user.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import shaded_package.javax.validation.Valid;
 
 import java.net.URI;
-import java.util.HashSet;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -24,11 +22,13 @@ public class AuthController {
     private final FirebaseService firebaseService;
     private final UserService userService;
     private final JwtService jwtService;
+    private final AuthService authService;
 
-    public AuthController(FirebaseService firebaseService, UserService userService, JwtService jwtService) {
+    public AuthController(FirebaseService firebaseService, UserService userService, JwtService jwtService, AuthService authService) {
         this.firebaseService = firebaseService;
         this.userService = userService;
         this.jwtService = jwtService;
+        this.authService = authService;
     }
 
     @PostMapping("/login")
@@ -54,7 +54,7 @@ public class AuthController {
             // 4. Set JWT as HttpOnly cookie
             ResponseCookie cookie = ResponseCookie.from("jwt", jwt)
                     .httpOnly(true)
-                    .secure(true)
+                    .secure(false)
                     .path("/")
                     .maxAge(JwtService.JWT_LIFESPAN_SECOND)
                     .sameSite("Strict")
@@ -70,52 +70,11 @@ public class AuthController {
         }
     }
 
-
     @PostMapping("/register")
-    public ResponseEntity<UserBaseDto> register(@Valid @RequestBody UserRegisterDto request, HttpServletResponse response) {
-        if (!request.getEmail().toLowerCase().trim().endsWith(".edu.tr")) {
-            throw new InvalidEmailException("Email must end with '.edu.tr' to be eligible.");
-        }
-        try {
-            // 1. Verify Firebase ID token and get UID
-            String uid = firebaseService.verifyIdTokenAndGetUID(request.getFirebaseIdToken());
-
-            // 2. Create a UserBaseDto to use in UserService
-            UserBaseDto user = new UserBaseDto();
-            user.setFirstname(request.getFirstname());
-            user.setSurname(request.getSurname());
-            user.setEmail(request.getEmail());
-            user.setPhone(request.getPhone());
-            user.setCity(request.getCity());
-            user.setGender(request.getGender());
-            user.setCurrentDormId(request.getCurrentDormId());
-            user.setFirebaseUID(uid);
-            user.setRoles(new HashSet<>());
-
-            // 3. Create user in your system
-            UserBaseDto savedUser = userService.create(user);
-
-            // 4. Generate JWT
-            String jwt = jwtService.generateToken(uid);
-
-            // 5. Set JWT as HttpOnly cookie
-            ResponseCookie cookie = ResponseCookie.from("jwt", jwt)
-                    .httpOnly(true)
-                    .secure(true)
-                    .path("/")
-                    .maxAge(JwtService.JWT_LIFESPAN_SECOND)
-                    .sameSite("Strict")
-                    .build();
-
-            response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-
-            // 6. Return 201 Created with location header
-            URI location = URI.create("/api/users/" + savedUser.getId());
-            return ResponseEntity.created(location).body(savedUser);
-
-        } catch (FirebaseAuthException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+    public ResponseEntity<UserBaseDto> register(@Valid @RequestBody UserCreateRequest request) throws FirebaseAuthException {
+        UserBaseDto savedUser = authService.registerUser(request);
+        URI location = URI.create("/api/users/" + savedUser.getId());
+        return ResponseEntity.created(location).body(savedUser);
     }
 
     @GetMapping("/me")
@@ -143,7 +102,7 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
-        // Clear the cookie by setting Max-Age=0
+        // Clear the cookie
         ResponseCookie cookie = ResponseCookie.from("jwt", "")
                 .httpOnly(true)
                 .secure(true)
@@ -155,5 +114,13 @@ public class AuthController {
         response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         return ResponseEntity.ok("Logged out");
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+        boolean deleted = userService.delete(id);
+        return deleted
+                ? ResponseEntity.status(HttpStatus.NO_CONTENT).body("User successfully deleted")
+                : ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
     }
 }

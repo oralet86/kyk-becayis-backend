@@ -25,7 +25,7 @@ public class Posting {
     private Boolean isValid;
 
     @NotNull
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDate date;
 
     @ManyToOne
@@ -48,6 +48,9 @@ public class Posting {
     protected void onCreate() {
         if (date == null) {
             date = LocalDate.now();
+        }
+        if (isValid == null) {
+            isValid = true;
         }
     }
 }

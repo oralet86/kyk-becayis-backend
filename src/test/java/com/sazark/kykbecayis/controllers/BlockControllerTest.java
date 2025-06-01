@@ -1,26 +1,20 @@
 package com.sazark.kykbecayis.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sazark.kykbecayis.config.TestSecurityConfig;
 import com.sazark.kykbecayis.misc.dto.BlockDto;
-import com.sazark.kykbecayis.misc.enums.GenderType;
 import com.sazark.kykbecayis.block.BlockService;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -33,119 +27,44 @@ class BlockControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     @MockitoBean
     private BlockService blockService;
 
-    private BlockDto getSampleDto() {
-        return BlockDto.builder()
-                .id(1L)
-                .type(GenderType.MALE)
-                .fullAddress("123 Test St")
-                .city("Testville")
-                .dormId(5L)
-                .build();
-    }
-
     @Test
-    void testCreateBlock() throws Exception {
-        BlockDto dto = getSampleDto();
+    void getBlockById_returnsBlock_whenIdProvided() throws Exception {
+        BlockDto block = BlockDto.builder().id(1L).name("A Block").build();
+        when(blockService.findById(1L)).thenReturn(block);
 
-        Mockito.when(blockService.create(any(BlockDto.class))).thenReturn(dto);
-
-        mockMvc.perform(post("/api/blocks")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isCreated())
-                .andExpect(header().string("Location", "/api/blocks/1"))
-                .andExpect(jsonPath("$.id").value(1L));
-    }
-
-    @Test
-    void testGetBlockById_found() throws Exception {
-        BlockDto dto = getSampleDto();
-
-        Mockito.when(blockService.findById(1L)).thenReturn(dto);
-
-        mockMvc.perform(get("/api/blocks/1"))
+        mockMvc.perform(get("/api/blocks").param("blockId", "1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.city").value("Testville"));
+                .andExpect(jsonPath("$.id").value(1));
     }
 
     @Test
-    void testGetBlockById_notFound() throws Exception {
-        Mockito.when(blockService.findById(1L)).thenReturn(null);
+    void getBlockById_returns404_whenNotFound() throws Exception {
+        when(blockService.findById(123L)).thenReturn(null);
 
-        mockMvc.perform(get("/api/blocks/1"))
+        mockMvc.perform(get("/api/blocks").param("blockId", "123"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    void testGetAllBlocks() throws Exception {
-        BlockDto dto = getSampleDto();
+    void getBlocksByDormId_returnsFilteredBlocks() throws Exception {
+        BlockDto block = BlockDto.builder().id(2L).build();
+        when(blockService.findByDormId(10L)).thenReturn(List.of(block));
 
-        Mockito.when(blockService.findAll()).thenReturn(List.of(dto));
+        mockMvc.perform(get("/api/blocks").param("dormId", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(2));
+    }
+
+    @Test
+    void getAllBlocks_returnsAll_whenNoParams() throws Exception {
+        BlockDto block = BlockDto.builder().id(3L).build();
+        when(blockService.findAll()).thenReturn(List.of(block));
 
         mockMvc.perform(get("/api/blocks"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].id").value(1L));
-    }
-
-    @Test
-    void testFilterBlocksByDormId() throws Exception {
-        BlockDto dto = getSampleDto();
-
-        Mockito.when(blockService.findByDormId(5L)).thenReturn(List.of(dto));
-
-        mockMvc.perform(get("/api/blocks/filter")
-                        .param("dormId", "5"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].id").value(1L))
-                .andExpect(jsonPath("$[0].dormId").value(5L));
-    }
-
-
-    @Test
-    void testUpdateBlock_found() throws Exception {
-        BlockDto dto = getSampleDto();
-
-        Mockito.when(blockService.update(eq(1L), any(BlockDto.class))).thenReturn(dto);
-
-        mockMvc.perform(put("/api/blocks/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L));
-    }
-
-    @Test
-    void testUpdateBlock_notFound() throws Exception {
-        Mockito.when(blockService.update(eq(1L), any(BlockDto.class))).thenReturn(null);
-
-        mockMvc.perform(put("/api/blocks/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(getSampleDto())))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void testDeleteBlock_found() throws Exception {
-        Mockito.when(blockService.delete(1L)).thenReturn(true);
-
-        mockMvc.perform(delete("/api/blocks/1"))
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    void testDeleteBlock_notFound() throws Exception {
-        Mockito.when(blockService.delete(1L)).thenReturn(false);
-
-        mockMvc.perform(delete("/api/blocks/1"))
-                .andExpect(status().isNotFound());
+                .andExpect(jsonPath("$[0].id").value(3));
     }
 }

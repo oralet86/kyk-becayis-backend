@@ -7,5 +7,5 @@ import java.util.List;
 
 @Repository
 public interface BlockRepository extends JpaRepository<Block, Long> {
-    List<Block> findByDormId(Long dormId);
+    List<Block> findAllByDormId(Long dormId);
 }

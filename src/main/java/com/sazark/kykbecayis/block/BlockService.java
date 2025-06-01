@@ -5,7 +5,6 @@ import com.sazark.kykbecayis.misc.mapper.BlockMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class BlockService {
@@ -35,25 +34,22 @@ public class BlockService {
     }
 
     public BlockDto findById(Long id) {
-        Block block = blockRepository.findById(id).orElse(null);
-        return blockMapper.toDTO(block);
+        return blockRepository.findById(id)
+                .map(blockMapper::toDTO)
+                .orElse(null);
     }
 
     public List<BlockDto> findAll() {
-        return blockRepository.findAll()
-                .stream()
+        return blockRepository.findAll().stream()
                 .map(blockMapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public List<BlockDto> findByDormId(Long dormId) {
-        return blockRepository.findByDormId(dormId)
-                .stream()
+        return blockRepository.findAllByDormId(dormId).stream()
                 .map(blockMapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
-
-
 
     public boolean delete(Long id) {
         if (!blockRepository.existsById(id)) {

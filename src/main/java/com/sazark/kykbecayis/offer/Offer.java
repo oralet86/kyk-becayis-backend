@@ -34,4 +34,14 @@ public class Offer {
     @NotNull
     @Column(nullable = false)
     private LocalDateTime created;
+
+    @PrePersist
+    public void prePersist() {
+        if (status == null) {
+            status = OfferStatus.PENDING;
+        }
+        if (created == null) {
+            created = LocalDateTime.now();
+        }
+    }
 }

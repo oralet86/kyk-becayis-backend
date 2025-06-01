@@ -2,10 +2,12 @@ package com.sazark.kykbecayis.offer;
 
 import com.sazark.kykbecayis.misc.dto.OfferDto;
 import com.sazark.kykbecayis.misc.mapper.OfferMapper;
+import com.sazark.kykbecayis.misc.request.OfferCreateRequest;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class OfferService {
@@ -17,8 +19,8 @@ public class OfferService {
         this.offerMapper = offerMapper;
     }
 
-    public OfferDto create(OfferDto offerDto) {
-        Offer offer = offerMapper.toEntity(offerDto);
+    public OfferDto create(OfferCreateRequest offerCreateRequest) {
+        Offer offer = offerMapper.toEntity(offerCreateRequest);
         Offer savedOffer = offerRepository.save(offer);
         return offerMapper.toDTO(savedOffer);
     }
@@ -35,15 +37,15 @@ public class OfferService {
     }
 
     public OfferDto findById(Long id) {
-        Offer offer = offerRepository.findById(id).orElse(null);
-        return offerMapper.toDTO(offer);
+        return offerRepository.findById(id)
+                .map(offerMapper::toDTO)
+                .orElse(null);
     }
 
     public List<OfferDto> findAll() {
-        return offerRepository.findAll()
-                .stream()
+        return offerRepository.findAll().stream()
                 .map(offerMapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public boolean delete(Long id) {
@@ -53,4 +55,25 @@ public class OfferService {
         offerRepository.deleteById(id);
         return true;
     }
+
+    public List<OfferDto> filterOffers(Long postingId, Long senderId, String senderUid) {
+        return offerRepository.findAll((root, query, cb) -> {
+                    List<Predicate> predicates = new ArrayList<>();
+
+                    if (postingId != null) {
+                        predicates.add(cb.equal(root.get("posting").get("id"), postingId));
+                    }
+                    if (senderId != null) {
+                        predicates.add(cb.equal(root.get("sender").get("id"), senderId));
+                    }
+                    if (senderUid != null) {
+                        predicates.add(cb.equal(root.get("sender").get("firebaseUID"), senderUid));
+                    }
+
+                    return cb.and(predicates.toArray(new Predicate[0]));
+                }).stream()
+                .map(offerMapper::toDTO)
+                .toList();
+    }
+
 }
