@@ -48,7 +48,6 @@ public class DormService {
     }
 
     public List<DormDto> filterDorms(String type, String city, String name) {
-        // Use a JPA Specification or manual filter logic
         return dormRepository.findAll((root, query, cb) -> {
                     var predicates = new ArrayList<Predicate>();
                     if (type != null) predicates.add(cb.equal(root.get("type"), type));

@@ -67,9 +67,9 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOriginPatterns(List.of(
                 "http://localhost:3000",
-                "http://localhost:3000",
                 "http://localhost:3001",
-                "https://becayisbul.com"
+                "https://becayisbul.com",
+                "https://www.becayisbul.com"
         )); // wildcard support
         config.setAllowedMethods(List.of("*"));
         config.setAllowedHeaders(List.of("*"));
