@@ -1,6 +1,7 @@
 package com.sazark.kykbecayis.services;
 
-import com.sazark.kykbecayis.auth.JwtService;
+import com.sazark.kykbecayis.core.config.EnvConfig;
+import com.sazark.kykbecayis.user.JwtService;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class JwtServiceTest {
 
+    private final String email = "test@test.edu.tr";
     private JwtService jwtService;
 
     @BeforeEach
@@ -22,56 +24,49 @@ public class JwtServiceTest {
 
     @Test
     public void generateToken_returnsValidToken() {
-        String uid = "test-user";
-        String token = jwtService.generateToken(uid);
-
+        String token = jwtService.generateToken(email);
         assertThat(token).isNotNull();
-        assertThat(jwtService.isTokenValid(token)).isTrue();
-        assertThat(jwtService.extractUID(token)).isEqualTo(uid);
+        assertThat(jwtService.validateToken(token)).isEqualTo(JwtService.JwtValidationResult.VALID);
+        assertThat(jwtService.extractEmail(token)).isEqualTo(email);
     }
 
     @Test
-    public void extractUID_returnsCorrectUID() {
-        String uid = "sample-uid";
-        String token = jwtService.generateToken(uid);
-
-        String extracted = jwtService.extractUID(token);
-
-        assertThat(extracted).isEqualTo(uid);
+    public void extractID_returnsCorrectEmail() {
+        String token = jwtService.generateToken(email);
+        String extracted = jwtService.extractEmail(token);
+        assertThat(extracted).isEqualTo(email);
     }
 
     @Test
-    public void isTokenValid_returnsFalse_forMalformedToken() {
+    public void validateTokenValid_returnsFalse_forMalformedToken() {
         String invalidToken = "this.is.not.a.jwt";
-
-        boolean isValid = jwtService.isTokenValid(invalidToken);
-
-        assertThat(isValid).isFalse();
+        JwtService.JwtValidationResult isValid = jwtService.validateToken(invalidToken);
+        assertThat(isValid).isEqualTo(JwtService.JwtValidationResult.INVALID);
     }
 
     @Test
-    public void isTokenValid_returnsFalse_forExpiredToken() {
-        String uid = "expired-user";
-        String secret = "your-256-bit-secret-your-256-bit-secret";
+    public void validateTokenValid_returnsFalse_forExpiredToken() {
+        String email = "expired@test.edu.tr";
+        String secret = EnvConfig.getJWT_SECRET();
         Key key = Keys.hmacShaKeyFor(secret.getBytes());
 
         // Manually create expired token
         String expiredToken = io.jsonwebtoken.Jwts.builder()
-                .setSubject(uid)
+                .setSubject(email)
                 .setIssuedAt(new Date(System.currentTimeMillis() - 20000))
                 .setExpiration(new Date(System.currentTimeMillis() - 10000)) // already expired
                 .signWith(key, io.jsonwebtoken.SignatureAlgorithm.HS256)
                 .compact();
 
-        assertThat(jwtService.isTokenValid(expiredToken)).isFalse();
+        assertThat(jwtService.validateToken(expiredToken)).isEqualTo(JwtService.JwtValidationResult.EXPIRED);
     }
 
     @Test
-    public void extractUID_throwsException_forInvalidToken() {
+    public void extractEmail_throwsException_forInvalidToken() {
         String malformedToken = "invalid.token.payload";
 
         assertThrows(io.jsonwebtoken.JwtException.class, () -> {
-            jwtService.extractUID(malformedToken);
+            jwtService.extractEmail(malformedToken);
         });
     }
 }

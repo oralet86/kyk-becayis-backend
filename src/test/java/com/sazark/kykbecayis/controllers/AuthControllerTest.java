@@ -1,242 +1,237 @@
 package com.sazark.kykbecayis.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.firebase.ErrorCode;
-import com.google.firebase.auth.FirebaseAuthException;
-import com.sazark.kykbecayis.auth.FirebaseService;
-import com.sazark.kykbecayis.auth.JwtService;
 import com.sazark.kykbecayis.config.TestSecurityConfig;
-import com.sazark.kykbecayis.misc.dto.FirebaseIdTokenDto;
-import com.sazark.kykbecayis.misc.dto.user.UserBaseDto;
-import com.sazark.kykbecayis.misc.request.UserCreateRequest;
-import com.sazark.kykbecayis.misc.enums.Gender;
+import com.sazark.kykbecayis.core.enums.Gender;
+import com.sazark.kykbecayis.core.filters.JwtAuthFilter;
+import com.sazark.kykbecayis.user.JwtService;
 import com.sazark.kykbecayis.user.UserService;
+import com.sazark.kykbecayis.user.dto.UserCreateRequest;
+import com.sazark.kykbecayis.user.dto.UserDto;
+import com.sazark.kykbecayis.user.dto.UserLoginRequest;
+import com.sazark.kykbecayis.user.dto.UserPatchRequest;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+import java.util.Set;
+
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @Import(TestSecurityConfig.class)
 @ActiveProfiles("test")
-public class AuthControllerTest {
+class AuthControllerTest {
+
+    private static final Long USER_ID = 42L;
+    private static final String EMAIL = "test@uni.edu.tr";
+    private static final String PASSWORD = "secret_pw";
+    private static final String JWT = "signed_jwt_token";
 
     @Autowired
     private MockMvc mockMvc;
-
-    @MockitoBean
-    private FirebaseService firebaseService;
-
-    @MockitoBean
-    private UserService userService;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @MockitoBean
     private JwtService jwtService;
+    @MockitoBean
+    private UserService userService;
+    @MockitoBean
+    private AuthenticationManager authenticationManager;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
-    private final String VALID_FIREBASE_TOKEN = "valid_token";
-    private final String INVALID_FIREBASE_TOKEN = "invalid_token";
-    private final String UID = "firebase_uid";
-    private final String JWT = "jwt_token";
-
-    private UserBaseDto userBaseDto;
+    private UserDto userDto;
 
     @BeforeEach
-    public void setup() {
-        userBaseDto = new UserBaseDto();
-        userBaseDto.setId(1L);
-        userBaseDto.setFirebaseUID(UID);
-        userBaseDto.setEmail("test@example.com");
+    void init() {
+        SecurityContextHolder.clearContext();
+        userDto = UserDto.builder()
+                .id(USER_ID)
+                .firstname("Test")
+                .surname("User")
+                .email(EMAIL)
+                .gender(Gender.MALE)
+                .roles(Set.of())
+                .build();
     }
 
     @Test
-    public void login_withValidToken_setsCookie() throws Exception {
-        when(firebaseService.verifyIdTokenAndGetUID(VALID_FIREBASE_TOKEN)).thenReturn(UID);
-        when(userService.getByFirebaseUID(UID)).thenReturn(userBaseDto);
-        when(jwtService.generateToken(UID)).thenReturn(JWT);
+    void login_validCredentials_setsCookie() throws Exception {
+        when(authenticationManager.authenticate(any())).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL, PASSWORD, List.of()));
+        when(userService.getByUserEmail(EMAIL)).thenReturn(userDto);
+        when(jwtService.generateToken(EMAIL)).thenReturn(JWT);
 
-        FirebaseIdTokenDto loginRequest = new FirebaseIdTokenDto();
-        loginRequest.setFirebaseIdToken(VALID_FIREBASE_TOKEN);
+        UserLoginRequest body = new UserLoginRequest(EMAIL, PASSWORD);
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginRequest)))
+                        .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isOk())
-                .andExpect(header().string(HttpHeaders.SET_COOKIE, org.hamcrest.Matchers.containsString("jwt=" + JWT)))
-                .andExpect(header().string(HttpHeaders.SET_COOKIE, org.hamcrest.Matchers.containsString("HttpOnly")));
+                .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString(JwtAuthFilter.TOKEN_NAME + "=" + JWT)))
+                .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("HttpOnly")))
+                .andExpect(content().string("Login successful"));
     }
 
     @Test
-    public void login_withInvalidToken_returnsUnauthorized() throws Exception {
-        when(firebaseService.verifyIdTokenAndGetUID(INVALID_FIREBASE_TOKEN)).thenThrow(new FirebaseAuthException(
-                ErrorCode.UNKNOWN,
-                "message",
-                null,
-                null,
-                null));
-
-        FirebaseIdTokenDto loginRequest = new FirebaseIdTokenDto(INVALID_FIREBASE_TOKEN);
+    void login_badCredentials_401() throws Exception {
+        when(authenticationManager.authenticate(any())).thenThrow(new BadCredentialsException("bad"));
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginRequest)))
+                        .content(objectMapper.writeValueAsString(new UserLoginRequest(EMAIL, "wrong"))))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
-    public void login_withMissingToken_returnsBadRequest() throws Exception {
-        FirebaseIdTokenDto loginRequest = new FirebaseIdTokenDto("");
-
+    void login_missingBody_400() throws Exception {
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginRequest)))
+                        .content("{}"))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    public void register_withValidToken_returnsCreated() throws Exception {
-        when(firebaseService.verifyIdTokenAndGetUID(VALID_FIREBASE_TOKEN)).thenReturn(UID);
-        when(userService.create(any(UserBaseDto.class))).thenReturn(userBaseDto);
+    void register_validRequest_201() throws Exception {
+        when(userService.create(any(UserCreateRequest.class))).thenReturn(userDto);
 
-        UserCreateRequest request = new UserCreateRequest();
-        request.setFirebaseIdToken(VALID_FIREBASE_TOKEN);
-        request.setFirstname("Test");
-        request.setSurname("User");
-        request.setEmail("test@uni.edu.tr");
-        request.setPhone("1234567890");
-        request.setCity("Istanbul");
-        request.setGender(Gender.MALE);
-        request.setCurrentDormId(10L);
+        UserCreateRequest req = UserCreateRequest.builder()
+                .firstname("Test").surname("User")
+                .email("new@uni.edu.tr").phone("1234567890")
+                .city("Istanbul").gender(Gender.MALE)
+                .currentDormId(10L).password("pw")
+                .build();
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", "/api/users/1"))
-                .andExpect(jsonPath("$.id").value(1));
-    }
-
-
-    @Test
-    public void register_withInvalidToken_returnsUnauthorized() throws Exception {
-        when(firebaseService.verifyIdTokenAndGetUID(INVALID_FIREBASE_TOKEN)).thenThrow(new FirebaseAuthException(
-                ErrorCode.UNKNOWN,
-                "message",
-                null,
-                null,
-                null));
-
-        UserCreateRequest request = new UserCreateRequest();
-        request.setFirebaseIdToken(INVALID_FIREBASE_TOKEN);
-        request.setFirstname("Test");
-        request.setSurname("User");
-        request.setEmail("test@uni.edu.tr");
-        request.setPhone("1234567890");
-        request.setCity("Istanbul");
-        request.setGender(Gender.MALE);
-        request.setCurrentDormId(10L);
-
-        mockMvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isUnauthorized());
+                .andExpect(header().string("Location", "/api/users/" + USER_ID))
+                .andExpect(jsonPath("$.id").value(USER_ID));
     }
 
     @Test
-    public void me_withValidJwt_returnsUserInfo() throws Exception {
-        when(jwtService.isTokenValid(JWT)).thenReturn(true);
-        when(jwtService.extractUID(JWT)).thenReturn(UID);
-        when(userService.getByFirebaseUID(UID)).thenReturn(userBaseDto);
+    void me_authenticated_returnsProfile() throws Exception {
+        when(jwtService.validateToken(any())).thenReturn(JwtService.JwtValidationResult.VALID);
+        when(jwtService.extractEmail(JWT)).thenReturn(EMAIL);
+        when(userService.getByUserEmail(EMAIL)).thenReturn(userDto);
 
-        mockMvc.perform(get("/api/auth/me")
-                        .cookie(new Cookie("jwt", JWT)))
+        mockMvc.perform(get("/api/auth/me").cookie(new Cookie(JwtAuthFilter.TOKEN_NAME, JWT)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.email").value(userBaseDto.getEmail()))
-                .andExpect(jsonPath("$.firebaseUID").value(userBaseDto.getFirebaseUID()));
+                .andExpect(jsonPath("$.id").value(USER_ID))
+                .andExpect(jsonPath("$.email").value(EMAIL));
     }
 
     @Test
-    public void me_withoutJwt_returnsUnauthorized() throws Exception {
+    void me_missingJwt_400() throws Exception {
+        when(jwtService.validateToken(any())).thenReturn(JwtService.JwtValidationResult.INVALID);
+
         mockMvc.perform(get("/api/auth/me"))
-                .andExpect(status().isUnauthorized())
-                .andExpect(content().string("Not logged in"));
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    public void me_withInvalidJwt_returnsUnauthorized() throws Exception {
-        when(jwtService.isTokenValid(JWT)).thenReturn(false);
-
-        mockMvc.perform(get("/api/auth/me")
-                        .cookie(new Cookie("jwt", JWT)))
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    public void me_withValidJwt_butUserNotFound_returnsUnauthorized() throws Exception {
-        when(jwtService.isTokenValid(JWT)).thenReturn(true);
-        when(jwtService.extractUID(JWT)).thenReturn(UID);
-        when(userService.getByFirebaseUID(UID)).thenReturn(null);
-
-        mockMvc.perform(get("/api/auth/me")
-                        .cookie(new Cookie("jwt", JWT)))
-                .andExpect(status().isUnauthorized())
-                .andExpect(content().string("User not found"));
-    }
-
-    @Test
-    public void logout_shouldClearJwtCookie() throws Exception {
+    void logout_clearsCookie() throws Exception {
         mockMvc.perform(post("/api/auth/logout"))
                 .andExpect(status().isOk())
-                .andExpect(header().string(HttpHeaders.SET_COOKIE, org.hamcrest.Matchers.containsString("jwt=;")))
-                .andExpect(header().string(HttpHeaders.SET_COOKIE, org.hamcrest.Matchers.containsString("Max-Age=0")))
-                .andExpect(header().string(HttpHeaders.SET_COOKIE, org.hamcrest.Matchers.containsString("HttpOnly")));
+                .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString(JwtAuthFilter.TOKEN_NAME + "=")))
+                .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("Max-Age=0")))
+                .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("HttpOnly")));
     }
 
-    @Test
-    public void expiredJwtToken_shouldBeRejected() throws Exception {
-        // Mock an expired token
-        when(jwtService.isTokenValid(JWT)).thenReturn(false);
+    @Nested
+    class PatchUser {
 
-        mockMvc.perform(get("/admin")
-                        .cookie(new Cookie("jwt", JWT)))
-                .andExpect(status().isUnauthorized());
+        private final UserPatchRequest patchReq =
+                UserPatchRequest.builder().firstname("NewName").build();
+
+        @Test
+        void patch_self_200() throws Exception {
+            when(jwtService.validateToken(any())).thenReturn(JwtService.JwtValidationResult.VALID);
+            when(jwtService.extractEmail(JWT)).thenReturn(EMAIL);
+            when(userService.updateByEmail(EMAIL, patchReq)).thenReturn(userDto);
+
+            mockMvc.perform(patch("/api/auth/me")
+                            .cookie(new Cookie(JwtAuthFilter.TOKEN_NAME, JWT))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(patchReq)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(USER_ID));
+        }
+
+        @Test
+        void patch_self_notFound_404() throws Exception {
+            when(jwtService.validateToken(any())).thenReturn(JwtService.JwtValidationResult.VALID);
+            when(jwtService.extractEmail(JWT)).thenReturn(EMAIL);
+            when(userService.updateByEmail(EMAIL, patchReq)).thenReturn(null);
+
+            mockMvc.perform(patch("/api/auth/me")
+                            .cookie(new Cookie(JwtAuthFilter.TOKEN_NAME, JWT))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(patchReq)))
+                    .andExpect(status().isNotFound());
+        }
+
+        @Test
+        void patch_unauthenticated_401() throws Exception {
+            when(jwtService.validateToken(JWT)).thenReturn(JwtService.JwtValidationResult.INVALID);
+
+            mockMvc.perform(patch("/api/auth/me")
+                            .cookie(new Cookie(JwtAuthFilter.TOKEN_NAME, JWT))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(patchReq)))
+                    .andExpect(status().isUnauthorized());
+        }
     }
 
     @Nested
     class DeleteUser {
 
         @Test
-        void shouldDeleteUserSuccessfully() throws Exception {
-            Mockito.when(userService.delete(5L)).thenReturn(true);
+        void deleteExisting_204() throws Exception {
+            when(jwtService.validateToken(any())).thenReturn(JwtService.JwtValidationResult.VALID);
+            when(jwtService.extractEmail(JWT)).thenReturn(EMAIL);
+            when(userService.deleteByEmail(EMAIL)).thenReturn(true);
 
-            mockMvc.perform(delete("/api/auth/{id}", 5))
+            mockMvc.perform(delete("/api/auth/me").cookie(new Cookie(JwtAuthFilter.TOKEN_NAME, JWT)))
                     .andExpect(status().isNoContent());
         }
 
         @Test
-        void shouldReturn404IfDeleteFails() throws Exception {
-            Mockito.when(userService.delete(404L)).thenReturn(false);
+        void deleteMissing_404() throws Exception {
+            when(jwtService.validateToken(any())).thenReturn(JwtService.JwtValidationResult.VALID);
+            when(jwtService.extractEmail(JWT)).thenReturn(EMAIL);
+            when(userService.deleteByEmail(EMAIL)).thenReturn(false);
 
-            mockMvc.perform(delete("/api/auth/{id}", 404))
+            mockMvc.perform(delete("/api/auth/me").cookie(new Cookie(JwtAuthFilter.TOKEN_NAME, JWT)))
                     .andExpect(status().isNotFound());
+        }
+
+        @Test
+        void delete_invalidJwt_401() throws Exception {
+            when(jwtService.validateToken(JWT)).thenReturn(JwtService.JwtValidationResult.INVALID);
+
+            mockMvc.perform(delete("/api/auth/me").cookie(new Cookie(JwtAuthFilter.TOKEN_NAME, JWT)))
+                    .andExpect(status().isUnauthorized());
         }
     }
 }

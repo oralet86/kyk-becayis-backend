@@ -1,10 +1,10 @@
 package com.sazark.kykbecayis.posting;
 
-import com.sazark.kykbecayis.dorm.Dorm;
+import com.sazark.kykbecayis.housing.dorm.Dorm;
 import com.sazark.kykbecayis.user.User;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import shaded_package.javax.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -28,8 +28,11 @@ public class Posting {
     @Column(nullable = false, updatable = false)
     private LocalDate date;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+            name = "user_id",
+            referencedColumnName = "id",
+            nullable = false)
     private User user;
 
     @OneToOne

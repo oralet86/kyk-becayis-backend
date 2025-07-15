@@ -1,15 +1,14 @@
 package com.sazark.kykbecayis.user;
 
-import com.sazark.kykbecayis.dorm.Dorm;
+import com.sazark.kykbecayis.core.enums.Gender;
+import com.sazark.kykbecayis.core.enums.Role;
+import com.sazark.kykbecayis.housing.dorm.Dorm;
 import com.sazark.kykbecayis.posting.Posting;
-import com.sazark.kykbecayis.misc.enums.Gender;
-import com.sazark.kykbecayis.misc.enums.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import shaded_package.javax.validation.constraints.NotBlank;
-import shaded_package.javax.validation.constraints.NotNull;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -29,50 +28,42 @@ public class User {
     private Long id;
 
     @Column(unique = true, nullable = false)
-    private String firebaseUID;
-
     @NotBlank
-    @Column(nullable = false)
-    private String firstname;
-
-    @NotBlank
-    @Column(nullable = false)
-    private String surname;
-
     @Email
-    @NotBlank
-    @Column(nullable = false)
     private String email;
 
     @NotBlank
     @Column(nullable = false)
-    private String phone;
+    private String passwordHash;
 
+    @NotBlank
+    @Column(nullable = false)
+    private String firstname;
+    @NotBlank
+    @Column(nullable = false)
+    private String surname;
+    @NotBlank
+    @Column(nullable = false)
+    private String phone;
     @NotBlank
     @Column(nullable = false)
     private String city;
 
-    @NotNull
+    @NotBlank
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"))
     @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
     private Set<Role> roles = new HashSet<>();
 
-    @Column(nullable = false, updatable = false)
+    @Column(updatable = false, nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     @CreationTimestamp
     private Date createdAt;
-
-    @Column(nullable = false)
-    private boolean isVerified = false;
-
-    @Column(nullable = false)
-    private boolean isBanned = false;
 
     @ManyToOne
     @JoinColumn(name = "current_dorm_id")

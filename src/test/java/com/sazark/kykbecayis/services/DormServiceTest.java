@@ -1,11 +1,11 @@
 package com.sazark.kykbecayis.services;
 
-import com.sazark.kykbecayis.misc.dto.DormDto;
-import com.sazark.kykbecayis.dorm.Dorm;
-import com.sazark.kykbecayis.misc.enums.GenderType;
-import com.sazark.kykbecayis.misc.mapper.DormMapper;
-import com.sazark.kykbecayis.dorm.DormRepository;
-import com.sazark.kykbecayis.dorm.DormService;
+import com.sazark.kykbecayis.core.enums.GenderType;
+import com.sazark.kykbecayis.core.mapper.DormMapper;
+import com.sazark.kykbecayis.housing.dorm.Dorm;
+import com.sazark.kykbecayis.housing.dorm.DormRepository;
+import com.sazark.kykbecayis.housing.dorm.DormService;
+import com.sazark.kykbecayis.housing.dto.DormDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -16,7 +16,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 class DormServiceTest {
 

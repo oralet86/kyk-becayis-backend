@@ -1,9 +1,11 @@
 package com.sazark.kykbecayis.posting;
 
-import com.sazark.kykbecayis.misc.dto.PostingDto;
-import com.sazark.kykbecayis.misc.mapper.PostingMapper;
-import com.sazark.kykbecayis.misc.request.PostingCreateRequest;
+import com.sazark.kykbecayis.core.mapper.PostingMapper;
+import com.sazark.kykbecayis.posting.dto.PostingCreateRequest;
+import com.sazark.kykbecayis.posting.dto.PostingDto;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -57,36 +59,38 @@ public class PostingService {
         return true;
     }
 
-    public List<PostingDto> filterPostings(Long userId, Long sourceDormId, Long targetDormId) {
-        return postingRepository.findAll((root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            if (userId != null) {
-                predicates.add(cb.equal(root.get("user").get("id"), userId));
-            }
-            if (sourceDormId != null) {
-                predicates.add(cb.equal(root.get("sourceDorm").get("id"), sourceDormId));
-            }
-            if (targetDormId != null) {
-                predicates.add(cb.equal(root.get("targetDorm").get("id"), targetDormId));
-            }
-            return cb.and(predicates.toArray(new Predicate[0]));
-        }).stream().map(postingMapper::toDTO).toList();
+    public List<PostingDto> filterPostings(Long userId,
+                                           Long sourceDormId,
+                                           Long targetDormId) {
+
+        return postingRepository.findAll((root, query, cb)
+                        -> getPredicate(userId, sourceDormId, targetDormId, root, cb))
+                .stream()
+                .map(postingMapper::toDTO)
+                .toList();
     }
 
-    public long countPostings(Long userId, Long sourceDormId, Long targetDormId) {
-        return postingRepository.count((root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            if (userId != null) {
-                predicates.add(cb.equal(root.get("user").get("id"), userId));
-            }
-            if (sourceDormId != null) {
-                predicates.add(cb.equal(root.get("sourceDorm").get("id"), sourceDormId));
-            }
-            if (targetDormId != null) {
-                predicates.add(cb.equal(root.get("targetDorm").get("id"), targetDormId));
-            }
-            return cb.and(predicates.toArray(new Predicate[0]));
-        });
+    public long countPostings(Long userId,
+                              Long sourceDormId,
+                              Long targetDormId) {
+
+        return postingRepository.count((root, query, cb)
+                -> getPredicate(userId, sourceDormId, targetDormId, root, cb));
     }
 
+    private Predicate getPredicate(Long userId, Long sourceDormId, Long targetDormId, Root<Posting> root, CriteriaBuilder cb) {
+        List<Predicate> preds = new ArrayList<>();
+
+        if (userId != null) {
+            preds.add(cb.equal(root.get("user").get("id"), userId));
+        }
+        if (sourceDormId != null) {
+            preds.add(cb.equal(root.get("sourceDorm").get("id"), sourceDormId));
+        }
+        if (targetDormId != null) {
+            var targets = root.join("targetDorms");
+            preds.add(cb.equal(targets.get("id"), targetDormId));
+        }
+        return cb.and(preds.toArray(new Predicate[0]));
+    }
 }

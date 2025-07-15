@@ -2,8 +2,8 @@ package com.sazark.kykbecayis.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sazark.kykbecayis.config.TestSecurityConfig;
-import com.sazark.kykbecayis.misc.dto.PostingDto;
 import com.sazark.kykbecayis.posting.PostingService;
+import com.sazark.kykbecayis.posting.dto.PostingDto;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,22 +31,13 @@ class PostingControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
     @Autowired
-    private ObjectMapper objectMapper;
-
+    private ObjectMapper mapper;
     @Autowired
     private PostingService postingService;
 
-    @TestConfiguration
-    static class PostingControllerTestContextConfiguration {
-        @Bean
-        public PostingService postingService() {
-            return Mockito.mock(PostingService.class);
-        }
-    }
-
-    private PostingDto getSampleDto() {
+    /* Helpers */
+    private PostingDto sample() {
         return PostingDto.builder()
                 .id(10L)
                 .userId(1L)
@@ -58,43 +49,47 @@ class PostingControllerTest {
     }
 
     @Test
-    void testCreatePosting() throws Exception {
-        PostingDto dto = getSampleDto();
-        when(postingService.create(any())).thenReturn(dto);
+    void createPosting_returns201() throws Exception {
+        when(postingService.create(any())).thenReturn(sample());
 
         mockMvc.perform(post("/api/postings")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                        .content(mapper.writeValueAsString(sample())))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", "/api/postings/10"));
     }
 
+    /* CRUD */
+
     @Test
-    void testGetAllPostings() throws Exception {
-        when(postingService.findAll()).thenReturn(List.of(getSampleDto()));
+    void getAllPostings_returnsList() throws Exception {
+        when(postingService.findAll()).thenReturn(List.of(sample()));
+
         mockMvc.perform(get("/api/postings"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(10L));
+                .andExpect(jsonPath("$[0].id").value(10));
     }
 
     @Test
-    void testDelete_Posting_found() throws Exception {
+    void deletePosting_found_returns204() throws Exception {
         when(postingService.delete(10L)).thenReturn(true);
+
         mockMvc.perform(delete("/api/postings/10"))
                 .andExpect(status().isNoContent());
     }
 
     @Test
-    void testDelete_Posting_notFound() throws Exception {
+    void deletePosting_missing_returns404() throws Exception {
         when(postingService.delete(10L)).thenReturn(false);
+
         mockMvc.perform(delete("/api/postings/10"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    void getPostingById_returnsPosting_whenFound() throws Exception {
-        PostingDto dto = PostingDto.builder().id(1L).build();
-        when(postingService.findById(1L)).thenReturn(dto);
+    void getPostingById_returnsEntity() throws Exception {
+        when(postingService.findById(1L))
+                .thenReturn(PostingDto.builder().id(1L).build());
 
         mockMvc.perform(get("/api/postings").param("id", "1"))
                 .andExpect(status().isOk())
@@ -102,7 +97,7 @@ class PostingControllerTest {
     }
 
     @Test
-    void getPostingById_returns404_whenNotFound() throws Exception {
+    void getPostingById_missing_returns404() throws Exception {
         when(postingService.findById(999L)).thenReturn(null);
 
         mockMvc.perform(get("/api/postings").param("id", "999"))
@@ -110,9 +105,9 @@ class PostingControllerTest {
     }
 
     @Test
-    void getPostings_withFilters_returnsFilteredList() throws Exception {
-        PostingDto dto = PostingDto.builder().id(2L).build();
-        when(postingService.filterPostings(5L, 10L, 15L)).thenReturn(List.of(dto));
+    void filterPostings_returnsList() throws Exception {
+        when(postingService.filterPostings(5L, 10L, 15L))
+                .thenReturn(List.of(PostingDto.builder().id(2L).build()));
 
         mockMvc.perform(get("/api/postings")
                         .param("userId", "5")
@@ -123,17 +118,7 @@ class PostingControllerTest {
     }
 
     @Test
-    void getAllPostings_returnsList_whenNoParams() throws Exception {
-        PostingDto dto = PostingDto.builder().id(3L).build();
-        when(postingService.findAll()).thenReturn(List.of(dto));
-
-        mockMvc.perform(get("/api/postings"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(3));
-    }
-
-    @Test
-    void getPostingCount_returnsCorrectCount() throws Exception {
+    void countPostings_returnsNumericString() throws Exception {
         when(postingService.countPostings(5L, 10L, 15L)).thenReturn(7L);
 
         mockMvc.perform(get("/api/postings/count")
@@ -142,5 +127,13 @@ class PostingControllerTest {
                         .param("targetDormId", "15"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("7"));
+    }
+
+    @TestConfiguration
+    static class Cfg {
+        @Bean
+        PostingService postingService() {
+            return Mockito.mock(PostingService.class);
+        }
     }
 }

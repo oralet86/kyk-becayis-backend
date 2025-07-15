@@ -1,8 +1,8 @@
 package com.sazark.kykbecayis.controllers;
 
 import com.sazark.kykbecayis.config.TestSecurityConfig;
-import com.sazark.kykbecayis.misc.dto.BlockDto;
-import com.sazark.kykbecayis.block.BlockService;
+import com.sazark.kykbecayis.housing.block.BlockService;
+import com.sazark.kykbecayis.housing.dto.BlockDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -15,8 +15,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -26,14 +27,13 @@ class BlockControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
     @MockitoBean
     private BlockService blockService;
 
     @Test
-    void getBlockById_returnsBlock_whenIdProvided() throws Exception {
-        BlockDto block = BlockDto.builder().id(1L).name("A Block").build();
-        when(blockService.findById(1L)).thenReturn(block);
+    void getBlockById_returnsBlock() throws Exception {
+        when(blockService.findById(1L))
+                .thenReturn(BlockDto.builder().id(1L).name("A Block").build());
 
         mockMvc.perform(get("/api/blocks").param("blockId", "1"))
                 .andExpect(status().isOk())
@@ -41,7 +41,7 @@ class BlockControllerTest {
     }
 
     @Test
-    void getBlockById_returns404_whenNotFound() throws Exception {
+    void getBlockById_returns404_whenMissing() throws Exception {
         when(blockService.findById(123L)).thenReturn(null);
 
         mockMvc.perform(get("/api/blocks").param("blockId", "123"))
@@ -49,9 +49,9 @@ class BlockControllerTest {
     }
 
     @Test
-    void getBlocksByDormId_returnsFilteredBlocks() throws Exception {
-        BlockDto block = BlockDto.builder().id(2L).build();
-        when(blockService.findByDormId(10L)).thenReturn(List.of(block));
+    void getBlocksByDormId_returnsFilteredList() throws Exception {
+        when(blockService.findByDormId(10L))
+                .thenReturn(List.of(BlockDto.builder().id(2L).build()));
 
         mockMvc.perform(get("/api/blocks").param("dormId", "10"))
                 .andExpect(status().isOk())
@@ -59,9 +59,9 @@ class BlockControllerTest {
     }
 
     @Test
-    void getAllBlocks_returnsAll_whenNoParams() throws Exception {
-        BlockDto block = BlockDto.builder().id(3L).build();
-        when(blockService.findAll()).thenReturn(List.of(block));
+    void getAllBlocks_returnsList() throws Exception {
+        when(blockService.findAll())
+                .thenReturn(List.of(BlockDto.builder().id(3L).build()));
 
         mockMvc.perform(get("/api/blocks"))
                 .andExpect(status().isOk())

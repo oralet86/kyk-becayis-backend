@@ -1,7 +1,7 @@
 package com.sazark.kykbecayis.posting;
 
-import com.sazark.kykbecayis.misc.dto.PostingDto;
-import com.sazark.kykbecayis.misc.request.PostingCreateRequest;
+import com.sazark.kykbecayis.posting.dto.PostingCreateRequest;
+import com.sazark.kykbecayis.posting.dto.PostingDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

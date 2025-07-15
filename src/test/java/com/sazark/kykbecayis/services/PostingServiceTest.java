@@ -1,180 +1,165 @@
 package com.sazark.kykbecayis.services;
 
-import com.sazark.kykbecayis.misc.dto.PostingDto;
-import com.sazark.kykbecayis.dorm.Dorm;
-import com.sazark.kykbecayis.misc.request.PostingCreateRequest;
+import com.sazark.kykbecayis.core.mapper.PostingMapper;
 import com.sazark.kykbecayis.posting.Posting;
-import com.sazark.kykbecayis.posting.PostingService;
-import com.sazark.kykbecayis.user.User;
-import com.sazark.kykbecayis.misc.mapper.PostingMapper;
-import com.sazark.kykbecayis.dorm.DormRepository;
 import com.sazark.kykbecayis.posting.PostingRepository;
+import com.sazark.kykbecayis.posting.PostingService;
+import com.sazark.kykbecayis.posting.dto.PostingCreateRequest;
+import com.sazark.kykbecayis.posting.dto.PostingDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.springframework.data.jpa.domain.Specification;
 
-import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class PostingServiceTest {
 
-    @Mock
     private PostingRepository postingRepository;
-
-    @Mock
-    private DormRepository dormRepository;
-
-    @Mock
     private PostingMapper postingMapper;
-
-    @InjectMocks
     private PostingService postingService;
-
-    private User user;
-    private Dorm sourceDorm;
-    private Dorm targetDorm;
-    private PostingDto dto;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        user = new User();
-        user.setId(1L);
-        sourceDorm = Dorm.builder().id(1L).build();
-        targetDorm = Dorm.builder().id(2L).build();
-
-        dto = PostingDto.builder()
-                .id(10L)
-                .userId(1L)
-                .sourceDormId(1L)
-                .targetDormIds(List.of(2L))
-                .isValid(true)
-                .date("2025-05-16")
-                .build();
-
-        when(postingMapper.toEntity(any(PostingDto.class))).thenAnswer(invocation -> {
-            PostingDto dtoArg = invocation.getArgument(0);
-            return Posting.builder()
-                    .id(dtoArg.getId())
-                    .isValid(dtoArg.getIsValid())
-                    .date(LocalDate.parse(dtoArg.getDate()))
-                    .user(user)
-                    .sourceDorm(sourceDorm)
-                    .targetDorms(List.of(targetDorm))
-                    .build();
-        });
-
-        when(postingMapper.toDTO(any(Posting.class))).thenAnswer(invocation -> {
-            Posting p = invocation.getArgument(0);
-            return PostingDto.builder()
-                    .id(p.getId())
-                    .userId(p.getUser().getId())
-                    .sourceDormId(p.getSourceDorm().getId())
-                    .targetDormIds(p.getTargetDorms().stream().map(Dorm::getId).toList())
-                    .isValid(p.getIsValid())
-                    .date(p.getDate().toString())
-                    .build();
-        });
-
+        postingRepository = mock(PostingRepository.class);
+        postingMapper = mock(PostingMapper.class);
+        postingService = new PostingService(postingRepository, postingMapper);
     }
 
     @Test
-    void testCreate() {
-        PostingCreateRequest request = PostingCreateRequest.builder()
-                .userId(1L)
-                .sourceDormId(1L)
-                .targetDormIds(List.of(2L))
-                .build();
+    void create_shouldReturnDto() {
+        PostingCreateRequest req = new PostingCreateRequest();
+        Posting posting = new Posting();
+        Posting saved = new Posting();
+        PostingDto dto = new PostingDto();
 
-        // Prepare expected Posting entity before save
-        Posting postingToSave = Posting.builder()
-                .user(user)
-                .sourceDorm(sourceDorm)
-                .targetDorms(List.of(targetDorm))
-                .isValid(true)
-                .date(LocalDate.now())
-                .build();
+        when(postingMapper.toEntity(req)).thenReturn(posting);
+        when(postingRepository.save(posting)).thenReturn(saved);
+        when(postingMapper.toDTO(saved)).thenReturn(dto);
 
-        // Prepare saved posting (with ID)
-        Posting savedPosting = Posting.builder()
-                .id(10L)
-                .user(user)
-                .sourceDorm(sourceDorm)
-                .targetDorms(List.of(targetDorm))
-                .isValid(true)
-                .date(LocalDate.now())
-                .build();
+        PostingDto result = postingService.create(req);
 
-        // Prepare expected DTO result
-        PostingDto expectedDto = PostingDto.builder()
-                .id(10L)
-                .userId(1L)
-                .sourceDormId(1L)
-                .targetDormIds(List.of(2L))
-                .isValid(true)
-                .date(savedPosting.getDate().toString())
-                .build();
-
-        // Mocks
-        when(dormRepository.findAllById(List.of(2L))).thenReturn(List.of(targetDorm));
-        when(postingMapper.toEntity(request)).thenReturn(postingToSave);
-        when(postingRepository.save(postingToSave)).thenReturn(savedPosting);
-        when(postingMapper.toDTO(savedPosting)).thenReturn(expectedDto);
-
-        // Act
-        PostingDto result = postingService.create(request);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(10L, result.getId());
-        assertEquals(1L, result.getUserId());
-        assertEquals(List.of(2L), result.getTargetDormIds());
-    }
-
-
-    @Test
-    void testFindById_found() {
-        Posting posting = Posting.builder()
-                .id(10L)
-                .user(user)
-                .sourceDorm(sourceDorm)
-                .targetDorms(List.of(targetDorm))
-                .isValid(true)
-                .date(LocalDate.now())
-                .build();
-
-        when(postingRepository.findById(10L)).thenReturn(Optional.of(posting));
-
-        PostingDto result = postingService.findById(10L);
-        assertNotNull(result);
-        assertEquals(10L, result.getId());
+        assertEquals(dto, result);
     }
 
     @Test
-    void testFindById_notFound() {
-        when(postingRepository.findById(10L)).thenReturn(Optional.empty());
-        assertNull(postingService.findById(10L));
+    void update_shouldReturnNullIfNotExists() {
+        Long id = 1L;
+        PostingDto dto = new PostingDto();
+
+        when(postingRepository.existsById(id)).thenReturn(false);
+
+        assertNull(postingService.update(id, dto));
     }
 
     @Test
-    void testDelete_existing() {
-        when(postingRepository.existsById(1L)).thenReturn(true);
-        boolean result = postingService.delete(1L);
+    void update_shouldUpdateAndReturnDtoIfExists() {
+        Long id = 1L;
+        PostingDto dto = new PostingDto();
+        Posting posting = new Posting();
+        Posting updated = new Posting();
+        PostingDto resultDto = new PostingDto();
+
+        when(postingRepository.existsById(id)).thenReturn(true);
+        when(postingMapper.toEntity(dto)).thenReturn(posting);
+        when(postingRepository.save(posting)).thenReturn(updated);
+        when(postingMapper.toDTO(updated)).thenReturn(resultDto);
+
+        PostingDto result = postingService.update(id, dto);
+
+        assertEquals(resultDto, result);
+        assertEquals(id, posting.getId());
+    }
+
+    @Test
+    void findById_shouldReturnDtoIfExists() {
+        Long id = 1L;
+        Posting posting = new Posting();
+        PostingDto dto = new PostingDto();
+
+        when(postingRepository.findById(id)).thenReturn(Optional.of(posting));
+        when(postingMapper.toDTO(posting)).thenReturn(dto);
+
+        PostingDto result = postingService.findById(id);
+
+        assertEquals(dto, result);
+    }
+
+    @Test
+    void findById_shouldReturnNullIfNotExists() {
+        Long id = 1L;
+
+        when(postingRepository.findById(id)).thenReturn(Optional.empty());
+        when(postingMapper.toDTO(null)).thenReturn(null);
+
+        PostingDto result = postingService.findById(id);
+
+        assertNull(result);
+    }
+
+    @Test
+    void findAll_shouldReturnAllDtos() {
+        List<Posting> postList = Arrays.asList(new Posting(), new Posting());
+        List<PostingDto> dtoList = Arrays.asList(new PostingDto(), new PostingDto());
+
+        when(postingRepository.findAll()).thenReturn(postList);
+        when(postingMapper.toDTO(postList.get(0))).thenReturn(dtoList.get(0));
+        when(postingMapper.toDTO(postList.get(1))).thenReturn(dtoList.get(1));
+
+        List<PostingDto> result = postingService.findAll();
+
+        assertEquals(dtoList, result);
+    }
+
+    @Test
+    void delete_shouldReturnFalseIfNotExists() {
+        Long id = 1L;
+
+        when(postingRepository.existsById(id)).thenReturn(false);
+
+        assertFalse(postingService.delete(id));
+    }
+
+    @Test
+    void delete_shouldReturnTrueIfExists() {
+        Long id = 1L;
+
+        when(postingRepository.existsById(id)).thenReturn(true);
+
+        boolean result = postingService.delete(id);
+
+        verify(postingRepository).deleteById(id);
         assertTrue(result);
-        verify(postingRepository).deleteById(1L);
     }
 
     @Test
-    void testDelete_notExisting() {
-        when(postingRepository.existsById(1L)).thenReturn(false);
-        boolean result = postingService.delete(1L);
-        assertFalse(result);
+    void filterPostings_shouldDelegateToRepositoryAndReturnDtos() {
+        Long userId = 1L, sourceDormId = 2L, targetDormId = 3L;
+        List<Posting> postList = Arrays.asList(new Posting(), new Posting());
+        List<PostingDto> dtoList = Arrays.asList(new PostingDto(), new PostingDto());
+
+        when(postingRepository.findAll(any(Specification.class))).thenReturn(postList);
+        when(postingMapper.toDTO(postList.get(0))).thenReturn(dtoList.get(0));
+        when(postingMapper.toDTO(postList.get(1))).thenReturn(dtoList.get(1));
+
+        List<PostingDto> result = postingService.filterPostings(userId, sourceDormId, targetDormId);
+
+        assertEquals(dtoList, result);
+    }
+
+    @Test
+    void countPostings_shouldDelegateToRepository() {
+        Long userId = 1L, sourceDormId = 2L, targetDormId = 3L;
+        long count = 42L;
+
+        when(postingRepository.count(any(Specification.class))).thenReturn(count);
+
+        long result = postingService.countPostings(userId, sourceDormId, targetDormId);
+
+        assertEquals(count, result);
     }
 }

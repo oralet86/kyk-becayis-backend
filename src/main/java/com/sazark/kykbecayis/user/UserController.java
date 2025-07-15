@@ -1,9 +1,8 @@
 package com.sazark.kykbecayis.user;
 
-import com.sazark.kykbecayis.misc.dto.user.UserBaseDto;
+import com.sazark.kykbecayis.user.dto.UserDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import shaded_package.javax.validation.Valid;
 
 import java.util.List;
 
@@ -17,27 +16,15 @@ public class UserController {
     }
 
     @GetMapping("/filter")
-    public ResponseEntity<List<UserBaseDto>> filterUsers(
+    public ResponseEntity<List<UserDto>> filterUsers(
             @RequestParam(required = false) String postingId
     ) {
         return ResponseEntity.ok(userService.filterUsers(postingId));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserBaseDto> getUser(@PathVariable Long id) {
-        UserBaseDto user = userService.findById(id);
+    public ResponseEntity<UserDto> getUser(@PathVariable Long id) {
+        UserDto user = userService.getByUserId(id);
         return (user != null) ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
-    }
-
-    @GetMapping
-    public ResponseEntity<List<UserBaseDto>> getUsers() {
-        List<UserBaseDto> users = userService.findAll();
-        return (users != null) ? ResponseEntity.ok(users) : ResponseEntity.notFound().build();
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<UserBaseDto> updateUser(@PathVariable Long id, @Valid @RequestBody UserBaseDto userBaseDto) {
-        UserBaseDto updated = userService.update(id, userBaseDto);
-        return (updated != null) ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
     }
 }
