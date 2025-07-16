@@ -14,3 +14,5 @@ spring:
     properties:
       hibernate:
         format_sql: true
+jwt:
+  secret: test_secret_key_for_unit_tests_only_123456

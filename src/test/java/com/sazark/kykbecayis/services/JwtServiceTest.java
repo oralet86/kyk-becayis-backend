@@ -1,10 +1,14 @@
 package com.sazark.kykbecayis.services;
 
-import com.sazark.kykbecayis.core.config.EnvConfig;
+import com.sazark.kykbecayis.config.TestSecurityConfig;
 import com.sazark.kykbecayis.user.JwtService;
 import io.jsonwebtoken.security.Keys;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.security.Key;
 import java.util.Date;
@@ -12,15 +16,16 @@ import java.util.Date;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@SpringBootTest
+@AutoConfigureMockMvc
+@Import(TestSecurityConfig.class)
+@ActiveProfiles("test")
 public class JwtServiceTest {
 
     private final String email = "test@test.edu.tr";
-    private JwtService jwtService;
 
-    @BeforeEach
-    public void setUp() {
-        jwtService = new JwtService();
-    }
+    @Autowired
+    private JwtService jwtService;
 
     @Test
     public void generateToken_returnsValidToken() {
@@ -47,7 +52,7 @@ public class JwtServiceTest {
     @Test
     public void validateTokenValid_returnsFalse_forExpiredToken() {
         String email = "expired@test.edu.tr";
-        String secret = EnvConfig.getJWT_SECRET();
+        String secret = jwtService.getJwtSecret();
         Key key = Keys.hmacShaKeyFor(secret.getBytes());
 
         // Manually create expired token
