@@ -1,6 +1,12 @@
 FROM eclipse-temurin:17-jdk-jammy
 
 ARG JAR_FILE=target/*.jar
-COPY dorms.json dorms.json
+WORKDIR /app
+
 COPY ${JAR_FILE} app.jar
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+COPY dorms.json dorms.json
+COPY entry.sh entry.sh
+
+RUN chmod +x entry.sh
+
+ENTRYPOINT ["./entry.sh"]
