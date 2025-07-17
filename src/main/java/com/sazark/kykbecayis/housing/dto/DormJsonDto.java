@@ -1,12 +1,17 @@
-package com.sazark.kykbecayis.housing.dorm;
+package com.sazark.kykbecayis.housing.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sazark.kykbecayis.housing.block.BlockJsonDto;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class DormJsonDto {
 
     @JsonProperty("Name")
