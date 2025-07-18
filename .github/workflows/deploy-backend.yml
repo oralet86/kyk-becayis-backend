@@ -25,6 +25,16 @@ jobs:
           chmod +x ./mvnw
           ./mvnw clean package -DskipTests
 
+      - name: List build output
+        run: ls -lh target
+
+      - name: Ensure JAR file exists
+        run: |
+          if [ -z "$(ls target/*.jar 2>/dev/null)" ]; then
+            echo "No JAR found in target/. Check mvn build step."
+            exit 1
+          fi      
+
       - name: Validate docker build      # ensure Dockerfile builds
         run: docker compose build
 
