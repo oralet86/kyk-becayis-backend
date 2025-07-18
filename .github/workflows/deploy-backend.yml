@@ -76,6 +76,7 @@ jobs:
             cp ../dorms.json dorms.json
             
             # close down the old container if it is on
-            docker-compose down --remove-orphans
+            docker-compose down --remove-orphans || true
+            docker-compose rm -f becayis_app || true
             docker-compose pull postgres || true
             docker-compose up --build -d 
