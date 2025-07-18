@@ -33,7 +33,10 @@ jobs:
           if [ -z "$(ls target/*.jar 2>/dev/null)" ]; then
             echo "No JAR found in target/. Check mvn build step."
             exit 1
-          fi      
+          fi
+
+      - name: Rename JAR to fixed name
+        run: mv target/kykbecayis-0.0.1-SNAPSHOT.jar target/app.jar
 
       - name: Validate docker build      # ensure Dockerfile builds
         run: docker compose build
@@ -47,7 +50,7 @@ jobs:
           source: |
             Dockerfile
             docker-compose.yml
-            target/*.jar
+            target/app.jar
           target: ${{ env.REMOTE_DIR }}
 
       - name: Deploy containers          # ssh + compose up
