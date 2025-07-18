@@ -64,13 +64,18 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             set -e
+            # go to target directory
             cd ${{ env.REMOTE_DIR }}
             
+            # unzip the files and delete the tar
             tar xzf bundle.tar.gz
             rm bundle.tar.gz
             
             # honestly this is a mess, but it'll have to do for now
             cp ../.env .env
             cp ../dorms.json dorms.json
+            
+            # close down the old container if it is on
+            docker-compose down --remove-orphans
             docker-compose pull postgres || true
-            docker-compose up --build -d --remove-orphans
+            docker-compose up --build -d 
