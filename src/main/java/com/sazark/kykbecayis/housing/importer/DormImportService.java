@@ -6,6 +6,7 @@ import com.sazark.kykbecayis.housing.dorm.Dorm;
 import com.sazark.kykbecayis.housing.dorm.DormRepository;
 import com.sazark.kykbecayis.housing.dto.BlockJsonDto;
 import com.sazark.kykbecayis.housing.dto.DormJsonDto;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,12 +25,14 @@ public class DormImportService {
     private final DormRepository dormRepository;
     private final DormJsonReader dormJsonReader;
 
+    @Transactional
     public void importDormsFromJson() {
         List<DormJsonDto> dorms = dormJsonReader.readDormJson();
         saveDorms(dorms);
     }
 
-    private void saveDorms(List<DormJsonDto> dorms) {
+    @Transactional
+    protected void saveDorms(List<DormJsonDto> dorms) {
         Set<String> jsonDormKeys = dorms.stream()
                 .map(dto -> dto.getName() + "|" + dto.getCity())
                 .collect(Collectors.toSet());
@@ -64,7 +67,8 @@ public class DormImportService {
         }
     }
 
-    private boolean updateDormIfDifferent(Dorm existing, Dorm incoming) {
+    @Transactional
+    protected boolean updateDormIfDifferent(Dorm existing, Dorm incoming) {
         boolean updated = false;
 
         if (applyDormChanges(existing, incoming)) {
