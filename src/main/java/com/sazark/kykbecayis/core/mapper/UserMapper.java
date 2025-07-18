@@ -8,6 +8,7 @@ import com.sazark.kykbecayis.user.dto.UserDto;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class UserMapper {
@@ -21,56 +22,67 @@ public class UserMapper {
     public User toEntity(UserDto dto) {
         if (dto == null) return null;
 
-        return User.builder()
-                .id(dto.getId())
-                .firstname(dto.getFirstname())
-                .surname(dto.getSurname())
-                .email(dto.getEmail())
-                .phone(dto.getPhone())
-                .gender(dto.getGender())
-                .city(dto.getCity())
-                .roles(dto.getRoles())
-                .currentDorm(dto.getCurrentDormId() != null
-                        ? dormRepository.findById(dto.getCurrentDormId()).orElse(null)
-                        : null)
-                .build();
+        User user = new User();
+        user.setId(dto.getId());
+        user.setFirstname(dto.getFirstname());
+        user.setSurname(dto.getSurname());
+        user.setEmail(dto.getEmail());
+        user.setPhone(dto.getPhone());
+        user.setGender(dto.getGender());
+        user.setCity(dto.getCity());
+        user.setRoles(dto.getRoles());
+
+        if (dto.getCurrentDormId() != null) {
+            user.setCurrentDorm(dormRepository.findById(dto.getCurrentDormId()).orElse(null));
+        }
+
+        return user;
     }
 
     public User toEntity(UserCreateRequest dto) {
         if (dto == null) return null;
 
-        return User.builder()
-                .firstname(dto.getFirstname())
-                .surname(dto.getSurname())
-                .email(dto.getEmail())
-                .phone(dto.getPhone())
-                .city(dto.getCity())
-                .gender(dto.getGender())
-                .currentDorm(dto.getCurrentDormId() != null
-                        ? dormRepository.findById(dto.getCurrentDormId()).orElse(null)
-                        : null)
-                .build();
+        User user = new User();
+        user.setFirstname(dto.getFirstname());
+        user.setSurname(dto.getSurname());
+        user.setEmail(dto.getEmail());
+        user.setPhone(dto.getPhone());
+        user.setCity(dto.getCity());
+        user.setGender(dto.getGender());
+
+        if (dto.getCurrentDormId() != null) {
+            user.setCurrentDorm(dormRepository.findById(dto.getCurrentDormId()).orElse(null));
+        }
+
+        return user;
     }
 
     public UserDto toDTO(User user) {
         if (user == null) return null;
 
-        return UserDto.builder()
-                .id(user.getId())
-                .firstname(user.getFirstname())
-                .surname(user.getSurname())
-                .email(user.getEmail())
-                .phone(user.getPhone())
-                .city(user.getCity())
-                .gender(user.getGender())
-                .roles(user.getRoles())
-                .isAdmin(user.isAdmin())
-                .currentDormId(user.getCurrentDorm() != null
-                        ? user.getCurrentDorm().getId()
-                        : null)
-                .postingIds(user.getPostings() != null
-                        ? user.getPostings().stream().map(Posting::getId).toList()
-                        : new ArrayList<>())
-                .build();
+        UserDto dto = new UserDto();
+        dto.setId(user.getId());
+        dto.setFirstname(user.getFirstname());
+        dto.setSurname(user.getSurname());
+        dto.setEmail(user.getEmail());
+        dto.setPhone(user.getPhone());
+        dto.setCity(user.getCity());
+        dto.setGender(user.getGender());
+        dto.setRoles(user.getRoles());
+        dto.setIsAdmin(user.isAdmin());
+
+        if (user.getCurrentDorm() != null) {
+            dto.setCurrentDormId(user.getCurrentDorm().getId());
+        }
+
+        List<Long> postingIds = new ArrayList<>();
+        if (user.getPostings() != null) {
+            for (Posting posting : user.getPostings()) {
+                postingIds.add(posting.getId());
+            }
+        }
+        dto.setPostingIds(postingIds);
+
+        return dto;
     }
 }

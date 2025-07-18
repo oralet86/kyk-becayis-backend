@@ -7,6 +7,7 @@ import com.sazark.kykbecayis.posting.Posting;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -49,7 +50,7 @@ public class User {
     @Column(nullable = false)
     private String city;
 
-    @NotBlank
+    @NotNull
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Gender gender;
@@ -73,6 +74,6 @@ public class User {
     private List<Posting> postings;
 
     public boolean isAdmin() {
-        return roles.contains(Role.ADMIN);
+        return roles != null && roles.contains(Role.ADMIN);
     }
 }
