@@ -65,7 +65,12 @@ jobs:
           script: |
             set -e
             cd ${{ env.REMOTE_DIR }}
+            
             tar xzf bundle.tar.gz
             rm bundle.tar.gz
+            
+            # honestly this is a mess, but it'll have to do for now
+            cp ../.env .env
+            cp ../dorms.json dorms.json
             docker-compose pull postgres || true
             docker-compose up --build -d --remove-orphans
