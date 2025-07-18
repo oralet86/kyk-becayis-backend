@@ -41,6 +41,10 @@ jobs:
       - name: Validate docker build      # ensure Dockerfile builds
         run: docker compose build
 
+      - name: Confirm files exist before scp
+        run: ls -lh Dockerfile docker-compose.yml target/app.jar
+
+
       - name: Copy files to server       # send compose bundle
         uses: appleboy/scp-action@v0.1.3
         with:
