@@ -42,10 +42,10 @@ jobs:
         run: docker compose build
 
       - name: Confirm files exist before compression
-        run: ls -lh Dockerfile docker-compose.yml target/app.jar
+        run: ls -lh Dockerfile docker-compose.yml target/app.jar entry.sh
 
       - name: Compress to be sent files
-        run: tar czf bundle.tar.gz Dockerfile docker-compose.yml target/app.jar
+        run: tar czf bundle.tar.gz Dockerfile docker-compose.yml target/app.jar entry.sh
 
       - name: Copy the bundle.tar.gz to server       # send compose bundle
         uses: appleboy/scp-action@v0.1.3
