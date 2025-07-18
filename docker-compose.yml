@@ -21,8 +21,8 @@ services:
     env_file:
       - .env
     volumes:
-      - ./dorms.json:/app/dorms.json
-      - ./.env:/app/.env
+      - ../dorms.json:/app/dorms.json
+      - ../.env:/app/.env
     working_dir: /app
 
 volumes:

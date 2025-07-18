@@ -8,7 +8,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      REMOTE_DIR: /home/user/backend
+      REMOTE_DIR: /home/user/backend/deploy
 
     steps:
       - name: Checkout code              # pull repo
