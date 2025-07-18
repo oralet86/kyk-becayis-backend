@@ -67,5 +67,5 @@ jobs:
             cd ${{ env.REMOTE_DIR }}
             tar xzf bundle.tar.gz
             rm bundle.tar.gz
-            docker compose pull postgres || true
-            docker compose up --build -d --remove-orphans
+            docker-compose pull postgres || true
+            docker-compose up --build -d --remove-orphans
