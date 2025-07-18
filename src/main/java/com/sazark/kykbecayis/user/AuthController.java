@@ -75,6 +75,13 @@ public class AuthController {
         if (email == null || !email.toLowerCase().trim().endsWith(".edu.tr")) {
             throw new InvalidEmailException("Email must end with '.edu.tr'");
         }
+        String rawPassword = userCreateRequest.getPassword();
+        if (rawPassword == null || rawPassword.trim().isBlank()) {
+            throw new IllegalArgumentException("Password cannot be blank");
+        }
+        if (rawPassword.length() < 6 || rawPassword.length() > 32) {
+            throw new IllegalArgumentException("Password must contain between 6 to 32 characters");
+        }
         UserDto saved = userService.create(userCreateRequest);
         URI location = URI.create("/api/users/" + saved.getId());
         return ResponseEntity.created(location).body(saved);

@@ -40,9 +40,7 @@ public class UserService {
     public UserDto create(UserCreateRequest userCreateRequest) {
         User user = userMapper.toEntity(userCreateRequest);
         String rawPassword = userCreateRequest.getPassword();
-        if (rawPassword == null || rawPassword.isEmpty()) {
-            user.setPasswordHash(passwordEncoder.encode(rawPassword));
-        }
+        user.setPasswordHash(passwordEncoder.encode(rawPassword));
         User savedUser = userRepository.save(user);
         return userMapper.toDTO(savedUser);
     }

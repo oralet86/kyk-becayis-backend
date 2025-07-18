@@ -118,7 +118,7 @@ class AuthControllerTest {
                 .firstname("Test").surname("User")
                 .email("new@uni.edu.tr").phone("1234567890")
                 .city("Istanbul").gender(Gender.MALE)
-                .currentDormId(10L).password("pw")
+                .currentDormId(10L).password("password123")
                 .build();
 
         mockMvc.perform(post("/api/auth/register")
