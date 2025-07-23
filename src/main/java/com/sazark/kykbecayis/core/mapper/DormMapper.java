@@ -7,15 +7,18 @@ import com.sazark.kykbecayis.housing.dorm.Dorm;
 import com.sazark.kykbecayis.housing.dto.DormDto;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class DormMapper implements Mapper<Dorm, DormDto> {
 
     private final BlockRepository blockRepository;
+    private final BlockMapper blockMapper;
 
-    public DormMapper(BlockRepository blockRepository) {
+    public DormMapper(BlockRepository blockRepository, BlockMapper blockMapper) {
         this.blockRepository = blockRepository;
+        this.blockMapper = blockMapper;
     }
 
     @Override
@@ -30,9 +33,11 @@ public class DormMapper implements Mapper<Dorm, DormDto> {
                 .name(dorm.getName())
                 .phoneNumber(String.valueOf(dorm.getPhoneNumber()))
                 .location(dorm.getLocation())
-                .blockIds(dorm.getBlocks() != null
-                        ? dorm.getBlocks().stream().map(Block::getId).toList()
-                        : new ArrayList<>())
+                .blocks(
+                        dorm.getBlocks().stream()
+                                .map(blockMapper::toDTO)
+                                .collect(Collectors.toList())
+                )
                 .build();
     }
 
@@ -40,7 +45,8 @@ public class DormMapper implements Mapper<Dorm, DormDto> {
     public Dorm toEntity(DormDto dormDto) {
         if (dormDto == null) return null;
 
-        return Dorm.builder()
+        // 1) Build the Dorm shell
+        Dorm dorm = Dorm.builder()
                 .id(dormDto.getId())
                 .type(dormDto.getType())
                 .fullAddress(dormDto.getFullAddress())
@@ -48,9 +54,26 @@ public class DormMapper implements Mapper<Dorm, DormDto> {
                 .name(dormDto.getName())
                 .phoneNumber(dormDto.getPhoneNumber())
                 .location(dormDto.getLocation())
-                .blocks(dormDto.getBlockIds() != null
-                        ? blockRepository.findAllById(dormDto.getBlockIds())
-                        : new ArrayList<>())
                 .build();
+
+        // 2) Convert each BlockDto into a managed Block entity
+        List<Block> blocks = dormDto.getBlocks().stream()
+                .map(blockDto -> {
+                    // a) Try loading existing block
+                    Block block = blockRepository
+                            .findById(blockDto.getId())
+                            .orElse(new Block());
+
+                    block.setId(blockDto.getId());
+                    block.setName(blockDto.getName());
+                    block.setDorm(dorm);
+                    return block;
+                })
+                .toList();
+
+        // 3) Attach the blocks collection to the Dorm
+        dorm.setBlocks(blocks);
+
+        return dorm;
     }
 }
