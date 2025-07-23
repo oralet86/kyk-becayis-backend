@@ -12,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,7 +45,8 @@ class DormServiceTest {
                 .city("DormCity")
                 .name("DormName")
                 .phoneNumber("555-1234")
-                .blockIds(List.of(10L, 11L))
+                .blocks(new ArrayList<>(
+                ))
                 .build();
 
         entity = Dorm.builder()

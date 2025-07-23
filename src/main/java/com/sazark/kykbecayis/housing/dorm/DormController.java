@@ -1,11 +1,15 @@
 package com.sazark.kykbecayis.housing.dorm;
 
 import com.sazark.kykbecayis.housing.dto.DormDto;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.time.Instant;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/dorms")
@@ -16,24 +20,23 @@ public class DormController {
         this.dormService = dormService;
     }
 
+    /**
+     * Returns all dorm and block data. If the client already has the most recent data returns a 304 Not Modified.
+     *
+     * @param ifModifiedSinceMillis Last modified stamp of the client (in ms)
+     */
     @GetMapping
-    public ResponseEntity<?> getDorms(
-            @RequestParam(required = false) Long id,
-            @RequestParam(required = false) String type,
-            @RequestParam(required = false) String city,
-            @RequestParam(required = false) String name
+    public ResponseEntity<List<DormDto>> getDorms(
+            @RequestHeader(value = "If-Modified-Since", required = false) Long ifModifiedSinceMillis
     ) {
-        if (id != null) {
-            DormDto dorm = dormService.findById(id);
-            return (dorm != null) ? ResponseEntity.ok(dorm) : ResponseEntity.notFound().build();
-        }
+        Instant lastModified = dormService.findLastModifiedTime();
+        long lastModifiedMillis = lastModified.toEpochMilli();
 
-        boolean hasFilters = type != null || city != null || name != null;
-        if (hasFilters) {
-            return ResponseEntity.ok(dormService.filterDorms(type, city, name));
+        if (ifModifiedSinceMillis != null && lastModifiedMillis >= ifModifiedSinceMillis) {
+            return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
         }
-
-        return ResponseEntity.ok(dormService.findAll());
+        return ResponseEntity.ok()
+                .lastModified(lastModifiedMillis)
+                .body(dormService.findAll());
     }
-
 }

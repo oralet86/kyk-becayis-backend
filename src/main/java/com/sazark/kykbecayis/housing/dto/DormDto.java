@@ -27,5 +27,5 @@ public class DormDto {
     private String phoneNumber;
     private String location;
 
-    private List<Long> blockIds;
+    private List<BlockDto> blocks;
 }

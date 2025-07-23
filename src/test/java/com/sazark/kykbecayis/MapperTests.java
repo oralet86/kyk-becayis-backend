@@ -57,7 +57,7 @@ class MapperTests {
         userRepo = mock(UserRepository.class);
 
         blockMapper = new BlockMapper(dormRepo);
-        dormMapper = new DormMapper(blockRepo);
+        dormMapper = new DormMapper(blockRepo, blockMapper);
         postingMapper = new PostingMapper(dormRepo, userRepo);
         userMapper = new UserMapper(dormRepo);
     }
@@ -70,46 +70,6 @@ class MapperTests {
         assertThat(blockMapper.toEntity(null)).isNull();
     }
 
-    @Test
-    void blockMapper_roundTrip() {
-        Dorm dorm = new Dorm();
-        dorm.setId(7L);
-        when(dormRepo.findById(7L)).thenReturn(Optional.of(dorm));
-
-        BlockDto dto = BlockDto.builder()
-                .id(3L).type(GenderType.FEMALE)
-                .fullAddress("FA")
-                .city("C").location("L")
-                .name("N").dormId(7L)
-                .build();
-
-        // toEntity
-        Block entity = blockMapper.toEntity(dto);
-        assertThat(entity.getId()).isEqualTo(3L);
-        assertThat(entity.getDorm()).isSameAs(dorm);
-
-        // toDTO
-        entity.setDorm(dorm);
-        entity.setType(GenderType.MALE);
-        entity.setFullAddress("FA2");
-        entity.setCity("C2");
-        entity.setLocation("L2");
-        entity.setName("N2");
-
-        BlockDto dto2 = blockMapper.toDTO(entity);
-        assertThat(dto2).isEqualTo(
-                BlockDto.builder()
-                        .id(3L)
-                        .type(GenderType.MALE)
-                        .fullAddress("FA2")
-                        .city("C2")
-                        .location("L2")
-                        .name("N2")
-                        .dormId(7L)
-                        .build()
-        );
-    }
-
     /* Dorm Mapper */
 
     @Test
@@ -119,40 +79,53 @@ class MapperTests {
     }
 
     @Test
-    void dormMapper_roundTrip() {
-        Block b1 = new Block();
-        b1.setId(11L);
-        Block b2 = new Block();
-        b2.setId(12L);
-        when(blockRepo.findAllById(List.of(11L, 12L))).thenReturn(List.of(b1, b2));
-
+    void toEntity_populatesBlocksWithDorm() {
         DormDto dto = DormDto.builder()
                 .id(5L).type(GenderType.MALE)
                 .fullAddress("DA").city("DC")
                 .name("DN").phoneNumber("555")
-                .location("DL").blockIds(List.of(11L, 12L))
+                .location("DL")
+                .blocks(List.of(BlockDto.builder().id(11L).build(),
+                        BlockDto.builder().id(12L).build()))
                 .build();
 
-        Dorm entity = dormMapper.toEntity(dto);
-        assertThat(entity.getId()).isEqualTo(5L);
-        assertThat(entity.getBlocks()).containsExactly(b1, b2);
+        Dorm d1 = new Dorm();
+        d1.setId(5L);
+        Block b1 = new Block();
+        b1.setId(11L);
+        Block b2 = new Block();
+        b2.setId(12L);
+        when(blockRepo.findById(11L)).thenReturn(Optional.of(b1));
+        when(blockRepo.findById(12L)).thenReturn(Optional.of(b2));
 
-        // toDTO
-        entity.setBlocks(List.of(b1, b2));
-        DormDto dto2 = dormMapper.toDTO(entity);
-        assertThat(dto2).isEqualTo(
-                DormDto.builder()
-                        .id(5L)
-                        .type(GenderType.MALE)
-                        .fullAddress("DA")
-                        .city("DC")
-                        .name("DN")
-                        .phoneNumber("555")
-                        .location("DL")
-                        .blockIds(List.of(11L, 12L))
-                        .build()
-        );
+        Dorm entity = dormMapper.toEntity(dto);
+
+        assertThat(entity.getId()).isEqualTo(5L);
+        assertThat(entity.getBlocks())
+                .extracting(Block::getId)
+                .containsExactly(11L, 12L);
+        assertThat(entity.getBlocks())
+                .allSatisfy(block -> assertThat(block.getDorm()).isSameAs(entity));
     }
+
+    @Test
+    void toDTO_mapsBlocksToDtos() {
+        Dorm dorm = new Dorm();
+        dorm.setId(5L);
+        Block b1 = new Block();
+        b1.setId(11L);
+        Block b2 = new Block();
+        b2.setId(12L);
+        dorm.setBlocks(List.of(b1, b2));
+
+        DormDto dto = dormMapper.toDTO(dorm);
+
+        assertThat(dto.getId()).isEqualTo(5L);
+        assertThat(dto.getBlocks())
+                .extracting(BlockDto::getId)
+                .containsExactly(11L, 12L);
+    }
+
 
     /* Posting Mapper */
 

@@ -7,7 +7,11 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -16,6 +20,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EntityListeners(AuditingEntityListener.class)
+@Table(name = "dorm")
 public class Dorm {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,8 +49,12 @@ public class Dorm {
     private String location;
 
     @OneToMany(mappedBy = "dorm", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Block> blocks;
+    private List<Block> blocks = new ArrayList<>();
 
     @ManyToMany(mappedBy = "targetDorms")
     private List<Posting> postings;
+
+    @LastModifiedDate
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
 }
