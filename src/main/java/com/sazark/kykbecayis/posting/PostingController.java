@@ -1,7 +1,7 @@
 package com.sazark.kykbecayis.posting;
 
 import com.sazark.kykbecayis.posting.dto.PostingCreateRequest;
-import com.sazark.kykbecayis.posting.dto.PostingDto;
+import com.sazark.kykbecayis.posting.dto.PostingGetRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,8 +17,8 @@ public class PostingController {
     }
 
     @PostMapping
-    public ResponseEntity<PostingDto> createPosting(@RequestBody PostingCreateRequest postingCreateRequest) {
-        PostingDto savedPosting = postingService.create(postingCreateRequest);
+    public ResponseEntity<PostingGetRequest> createPosting(@RequestBody PostingCreateRequest postingCreateRequest) {
+        PostingGetRequest savedPosting = postingService.create(postingCreateRequest);
         return ResponseEntity
                 .created(URI.create("/api/postings/" + savedPosting.getId()))
                 .body(savedPosting);
@@ -32,7 +32,7 @@ public class PostingController {
             @RequestParam(required = false) Long targetDormId
     ) {
         if (id != null) {
-            PostingDto posting = postingService.findById(id);
+            PostingGetRequest posting = postingService.findById(id);
             return (posting != null) ? ResponseEntity.ok(posting) : ResponseEntity.notFound().build();
         }
 
@@ -54,8 +54,8 @@ public class PostingController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PostingDto> updatePosting(@PathVariable Long id, @RequestBody PostingDto postingDto) {
-        PostingDto updatedPosting = postingService.update(id, postingDto);
+    public ResponseEntity<PostingGetRequest> updatePosting(@PathVariable Long id, @RequestBody PostingGetRequest postingGetRequest) {
+        PostingGetRequest updatedPosting = postingService.update(id, postingGetRequest);
         return (updatedPosting != null) ? ResponseEntity.ok(updatedPosting) : ResponseEntity.notFound().build();
     }
 

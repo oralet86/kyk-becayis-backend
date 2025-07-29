@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PostingDto {
+public class PostingGetRequest {
     private Long id;
 
     private String date;
@@ -23,6 +23,9 @@ public class PostingDto {
 
     @NotNull
     private Long userId;
+
+    @NotNull
+    private String censoredName;
 
     @NotNull
     private Long sourceDormId;

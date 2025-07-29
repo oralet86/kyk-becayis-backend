@@ -2,7 +2,7 @@ package com.sazark.kykbecayis.posting;
 
 import com.sazark.kykbecayis.core.mapper.PostingMapper;
 import com.sazark.kykbecayis.posting.dto.PostingCreateRequest;
-import com.sazark.kykbecayis.posting.dto.PostingDto;
+import com.sazark.kykbecayis.posting.dto.PostingGetRequest;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
@@ -22,29 +22,29 @@ public class PostingService {
         this.postingMapper = postingMapper;
     }
 
-    public PostingDto create(PostingCreateRequest postingCreateRequest) {
+    public PostingGetRequest create(PostingCreateRequest postingCreateRequest) {
         Posting posting = postingMapper.toEntity(postingCreateRequest);
         Posting savedPosting = postingRepository.save(posting);
         return postingMapper.toDTO(savedPosting);
     }
 
-    public PostingDto update(Long id, PostingDto postingDto) {
+    public PostingGetRequest update(Long id, PostingGetRequest postingGetRequest) {
         if (!postingRepository.existsById(id)) {
             return null;
         }
 
-        Posting posting = postingMapper.toEntity(postingDto);
+        Posting posting = postingMapper.toEntity(postingGetRequest);
         posting.setId(id);
         Posting updatedPosting = postingRepository.save(posting);
         return postingMapper.toDTO(updatedPosting);
     }
 
-    public PostingDto findById(Long id) {
+    public PostingGetRequest findById(Long id) {
         Posting posting = postingRepository.findById(id).orElse(null);
         return postingMapper.toDTO(posting);
     }
 
-    public List<PostingDto> findAll() {
+    public List<PostingGetRequest> findAll() {
         return postingRepository.findAll()
                 .stream()
                 .map(postingMapper::toDTO)
@@ -59,9 +59,9 @@ public class PostingService {
         return true;
     }
 
-    public List<PostingDto> filterPostings(Long userId,
-                                           Long sourceDormId,
-                                           Long targetDormId) {
+    public List<PostingGetRequest> filterPostings(Long userId,
+                                                  Long sourceDormId,
+                                                  Long targetDormId) {
 
         return postingRepository.findAll((root, query, cb)
                         -> getPredicate(userId, sourceDormId, targetDormId, root, cb))

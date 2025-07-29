@@ -3,7 +3,7 @@ package com.sazark.kykbecayis.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sazark.kykbecayis.config.TestSecurityConfig;
 import com.sazark.kykbecayis.posting.PostingService;
-import com.sazark.kykbecayis.posting.dto.PostingDto;
+import com.sazark.kykbecayis.posting.dto.PostingGetRequest;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,8 +37,8 @@ class PostingControllerTest {
     private PostingService postingService;
 
     /* Helpers */
-    private PostingDto sample() {
-        return PostingDto.builder()
+    private PostingGetRequest sample() {
+        return PostingGetRequest.builder()
                 .id(10L)
                 .userId(1L)
                 .sourceDormId(1L)
@@ -89,7 +89,7 @@ class PostingControllerTest {
     @Test
     void getPostingById_returnsEntity() throws Exception {
         when(postingService.findById(1L))
-                .thenReturn(PostingDto.builder().id(1L).build());
+                .thenReturn(PostingGetRequest.builder().id(1L).build());
 
         mockMvc.perform(get("/api/postings").param("id", "1"))
                 .andExpect(status().isOk())
@@ -107,7 +107,7 @@ class PostingControllerTest {
     @Test
     void filterPostings_returnsList() throws Exception {
         when(postingService.filterPostings(5L, 10L, 15L))
-                .thenReturn(List.of(PostingDto.builder().id(2L).build()));
+                .thenReturn(List.of(PostingGetRequest.builder().id(2L).build()));
 
         mockMvc.perform(get("/api/postings")
                         .param("userId", "5")

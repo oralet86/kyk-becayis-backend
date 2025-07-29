@@ -5,7 +5,7 @@ import com.sazark.kykbecayis.posting.Posting;
 import com.sazark.kykbecayis.posting.PostingRepository;
 import com.sazark.kykbecayis.posting.PostingService;
 import com.sazark.kykbecayis.posting.dto.PostingCreateRequest;
-import com.sazark.kykbecayis.posting.dto.PostingDto;
+import com.sazark.kykbecayis.posting.dto.PostingGetRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.jpa.domain.Specification;
@@ -35,13 +35,13 @@ class PostingServiceTest {
         PostingCreateRequest req = new PostingCreateRequest();
         Posting posting = new Posting();
         Posting saved = new Posting();
-        PostingDto dto = new PostingDto();
+        PostingGetRequest dto = new PostingGetRequest();
 
         when(postingMapper.toEntity(req)).thenReturn(posting);
         when(postingRepository.save(posting)).thenReturn(saved);
         when(postingMapper.toDTO(saved)).thenReturn(dto);
 
-        PostingDto result = postingService.create(req);
+        PostingGetRequest result = postingService.create(req);
 
         assertEquals(dto, result);
     }
@@ -49,7 +49,7 @@ class PostingServiceTest {
     @Test
     void update_shouldReturnNullIfNotExists() {
         Long id = 1L;
-        PostingDto dto = new PostingDto();
+        PostingGetRequest dto = new PostingGetRequest();
 
         when(postingRepository.existsById(id)).thenReturn(false);
 
@@ -59,17 +59,17 @@ class PostingServiceTest {
     @Test
     void update_shouldUpdateAndReturnDtoIfExists() {
         Long id = 1L;
-        PostingDto dto = new PostingDto();
+        PostingGetRequest dto = new PostingGetRequest();
         Posting posting = new Posting();
         Posting updated = new Posting();
-        PostingDto resultDto = new PostingDto();
+        PostingGetRequest resultDto = new PostingGetRequest();
 
         when(postingRepository.existsById(id)).thenReturn(true);
         when(postingMapper.toEntity(dto)).thenReturn(posting);
         when(postingRepository.save(posting)).thenReturn(updated);
         when(postingMapper.toDTO(updated)).thenReturn(resultDto);
 
-        PostingDto result = postingService.update(id, dto);
+        PostingGetRequest result = postingService.update(id, dto);
 
         assertEquals(resultDto, result);
         assertEquals(id, posting.getId());
@@ -79,12 +79,12 @@ class PostingServiceTest {
     void findById_shouldReturnDtoIfExists() {
         Long id = 1L;
         Posting posting = new Posting();
-        PostingDto dto = new PostingDto();
+        PostingGetRequest dto = new PostingGetRequest();
 
         when(postingRepository.findById(id)).thenReturn(Optional.of(posting));
         when(postingMapper.toDTO(posting)).thenReturn(dto);
 
-        PostingDto result = postingService.findById(id);
+        PostingGetRequest result = postingService.findById(id);
 
         assertEquals(dto, result);
     }
@@ -96,7 +96,7 @@ class PostingServiceTest {
         when(postingRepository.findById(id)).thenReturn(Optional.empty());
         when(postingMapper.toDTO(null)).thenReturn(null);
 
-        PostingDto result = postingService.findById(id);
+        PostingGetRequest result = postingService.findById(id);
 
         assertNull(result);
     }
@@ -104,13 +104,13 @@ class PostingServiceTest {
     @Test
     void findAll_shouldReturnAllDtos() {
         List<Posting> postList = Arrays.asList(new Posting(), new Posting());
-        List<PostingDto> dtoList = Arrays.asList(new PostingDto(), new PostingDto());
+        List<PostingGetRequest> dtoList = Arrays.asList(new PostingGetRequest(), new PostingGetRequest());
 
         when(postingRepository.findAll()).thenReturn(postList);
         when(postingMapper.toDTO(postList.get(0))).thenReturn(dtoList.get(0));
         when(postingMapper.toDTO(postList.get(1))).thenReturn(dtoList.get(1));
 
-        List<PostingDto> result = postingService.findAll();
+        List<PostingGetRequest> result = postingService.findAll();
 
         assertEquals(dtoList, result);
     }
@@ -140,13 +140,13 @@ class PostingServiceTest {
     void filterPostings_shouldDelegateToRepositoryAndReturnDtos() {
         Long userId = 1L, sourceDormId = 2L, targetDormId = 3L;
         List<Posting> postList = Arrays.asList(new Posting(), new Posting());
-        List<PostingDto> dtoList = Arrays.asList(new PostingDto(), new PostingDto());
+        List<PostingGetRequest> dtoList = Arrays.asList(new PostingGetRequest(), new PostingGetRequest());
 
         when(postingRepository.findAll(any(Specification.class))).thenReturn(postList);
         when(postingMapper.toDTO(postList.get(0))).thenReturn(dtoList.get(0));
         when(postingMapper.toDTO(postList.get(1))).thenReturn(dtoList.get(1));
 
-        List<PostingDto> result = postingService.filterPostings(userId, sourceDormId, targetDormId);
+        List<PostingGetRequest> result = postingService.filterPostings(userId, sourceDormId, targetDormId);
 
         assertEquals(dtoList, result);
     }

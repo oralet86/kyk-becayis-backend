@@ -14,7 +14,7 @@ import com.sazark.kykbecayis.housing.dto.BlockDto;
 import com.sazark.kykbecayis.housing.dto.DormDto;
 import com.sazark.kykbecayis.posting.Posting;
 import com.sazark.kykbecayis.posting.dto.PostingCreateRequest;
-import com.sazark.kykbecayis.posting.dto.PostingDto;
+import com.sazark.kykbecayis.posting.dto.PostingGetRequest;
 import com.sazark.kykbecayis.user.User;
 import com.sazark.kykbecayis.user.UserRepository;
 import com.sazark.kykbecayis.user.dto.UserCreateRequest;
@@ -132,7 +132,7 @@ class MapperTests {
     @Test
     void postingMapper_null() {
         assertThat(postingMapper.toDTO(null)).isNull();
-        assertThat(postingMapper.toEntity((PostingDto) null)).isNull();
+        assertThat(postingMapper.toEntity((PostingGetRequest) null)).isNull();
         assertThat(postingMapper.toEntity((PostingCreateRequest) null)).isNull();
     }
 
@@ -140,10 +140,14 @@ class MapperTests {
     void postingMapper_toDTO_and_toEntity_dto() {
         User user = new User();
         user.setId(2L);
+        user.setFirstname("Mehmet");
+        user.setSurname("Fatih");
+
         Dorm sd = new Dorm();
         sd.setId(3L);
         Dorm td = new Dorm();
         td.setId(4L);
+
         Posting p = Posting.builder()
                 .id(9L)
                 .isValid(false)
@@ -153,19 +157,20 @@ class MapperTests {
                 .targetDorms(List.of(td))
                 .build();
 
-        PostingDto dto = postingMapper.toDTO(p);
+        PostingGetRequest dto = postingMapper.toDTO(p);
+
         assertThat(dto).isEqualTo(
-                PostingDto.builder()
+                PostingGetRequest.builder()
                         .id(9L)
                         .isValid(false)
                         .date("2025-07-15")
                         .userId(2L)
                         .sourceDormId(3L)
                         .targetDormIds(List.of(4L))
+                        .censoredName("M*** F***")      // ← NEW FIELD
                         .build()
         );
 
-        // toEntity(dto)
         when(userRepo.findById(2L)).thenReturn(Optional.of(user));
         when(dormRepo.findById(3L)).thenReturn(Optional.of(sd));
         when(dormRepo.findAllById(List.of(4L))).thenReturn(List.of(td));
@@ -200,6 +205,7 @@ class MapperTests {
         assertThat(e.getSourceDorm()).isSameAs(sd);
         assertThat(e.getTargetDorms()).containsExactly(td);
     }
+
 
     /* User Mapper */
 
